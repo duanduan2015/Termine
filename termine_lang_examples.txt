@@ -1,0 +1,40 @@
+# Minefield creation
+I: minefield <width> <height> <# of mines>
+
+example: minefield 20 10 30
+
+O: created minefield 20 x 10 with 30 mines
+
+# Minefield exploration
+
+I: poke <x> <y>
+O(1): boom
+O(2): <x> <y> opened as <num>
+      <x> <y> opened as <num>
+      ...
+O(3): out of bounds
+
+I: peek <x> <y>
+O(1): flagged
+O(2): <num>
+O(3): unexplored
+O(4): out of bounds
+
+I: query flags
+O(1): <num>
+
+I: query mines
+O(1): <num>
+
+I: query width
+O(1): <width>
+
+I: query height
+O(1): <height>
+
+I: query success
+O(1): <yes|no>
+
+
+---
+O(?): no minefield
