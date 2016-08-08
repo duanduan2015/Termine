@@ -35,6 +35,10 @@ O(1): <height>
 I: query success
 O(1): <yes|no>
 
+I: flag
+O(1): <x> <y> flagged
 
+I: unflagged
+O(1): <x> <y> unflagged
 ---
 O(?): no minefield
