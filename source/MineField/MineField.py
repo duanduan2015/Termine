@@ -4,6 +4,7 @@ class MineField:
         self.width = width
         self.status = [[0 for x in range(width)] for y in range(height)]
         self.flagged = [[False for x in range(width)] for y in range(height)]
+        self.opened = [[False for x in range(width)] for y in range(height)]
         self.numFlags = 0
     
     def getHeight(self):
