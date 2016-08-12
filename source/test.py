@@ -5,6 +5,7 @@ from MineShell.MineShell import MineShell
 
 def Main():
     s = MineShell()
+    #s.getInput('minefield 3 3 2')
     while True:
         a = input("termine> ")
         out = s.getInput(a)

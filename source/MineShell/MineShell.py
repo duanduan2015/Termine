@@ -1,5 +1,5 @@
 from MineField.MineField import MineField
-#from Deploy import Deploy 
+from DeployMines.DeployMines import DeployMines 
 from queue import Queue
 class MineShell:
     def __init__(self):
@@ -87,9 +87,12 @@ class MineShell:
     def unflag(self, x, y):
         if x < 0 or x >= self.field.width or y < 0 or y >= self.field.height:
             return 'out of bounds'
-        if (self.field.flagged[y][x] == True):
+        if self.field.flagged[y][x] == True:
             self.field.flagged[y][x] = False
             self.flagNum = self.flagNum - 1
+        return str(x) + self.space + str(y) + self.space + 'unflagged'
+ 
+
     
     
     def peek(self, x, y):
@@ -106,8 +109,9 @@ class MineShell:
     def createMineField(self, height, width, numOfMines):
         self.field = MineField(height, width) 
         self.mineNum = numOfMines
-        #self.deploy = Deploy(numOfMines, sefl.field)
-        return 'created minefield ' + str(20) + ' x ' + str(10) + ' with ' + str(30)+' mines'
+        d = DeployMines(self.field, numOfMines)
+        d.deployField()
+        return 'created minefield ' + str(width) + ' x ' + str(height) + ' with ' + str(numOfMines)+' mines'
 
     def poke(self, x, y):
         if (self.field == None):
@@ -129,49 +133,57 @@ class MineShell:
                 if px - 1 >= 0:
                     if py - 1 >= 0:
                         if not (px - 1, py - 1) in pos and self.field.status[py - 1][px - 1] != -1:
-                            pos.add((px - 1, py - 1))
-                            self.field.opened[py - 1][px - 1] = True
+                            if self.field.opened[py - 1][px - 1] is False:
+                                pos.add((px - 1, py - 1))
+                                self.field.opened[py - 1][px - 1] = True
                             if self.field.status[py - 1][px - 1] == 0:
                                 queue.put((px - 1, py - 1))
                     if py + 1 < self.field.height:
                         if not (px - 1, py + 1) in pos and self.field.status[py + 1][px - 1] != -1:
-                            pos.add((px - 1, py + 1))
-                            self.field.opened[py + 1][px - 1] = True
+                            if self.field.opened[py + 1][px - 1] is False: 
+                                pos.add((px - 1, py + 1))
+                                self.field.opened[py + 1][px - 1] = True
                             if self.field.status[py + 1][px - 1] == 0:
                                 queue.put((px - 1, py + 1))
                     if not (px - 1, py) in pos and self.field.status[py][px - 1] != -1:
-                        pos.add((px - 1, py))
-                        self.field.opened[py][px - 1] = True
+                        if self.field.opened[py][px - 1] is False:
+                            pos.add((px - 1, py))
+                            self.field.opened[py][px - 1] = True
                         if self.field.status[py][px - 1] == 0:
                             queue.put((px - 1, py))
                 if py - 1 >= 0:
                     if not (px, py - 1) in pos and self.field.status[py - 1][px] != -1:
-                        pos.add((px, py - 1))
-                        self.field.opened[py - 1][px] = True
+                        if self.field.opened[py - 1][px] is False: 
+                            pos.add((px, py - 1))
+                            self.field.opened[py - 1][px] = True
                         if self.field.status[py - 1][px] == 0:
                             queue.put((px, py - 1))
                 if py + 1 < self.field.height:
                     if not (px, py + 1) in pos and self.field.status[py + 1][px] != -1:
-                        pos.add((px, py + 1))
-                        self.field.opened[py + 1][px] = True
+                        if self.field.opened[py + 1][px] is False:
+                            pos.add((px, py + 1))
+                            self.field.opened[py + 1][px] = True
                         if self.field.status[py + 1][px] == 0:
                             queue.put((px, py + 1))
                 if px + 1 < self.field.width:
                     if py - 1 >= 0:
                         if not (px + 1, py - 1) in pos and self.field.status[py - 1][px + 1] != -1:
-                            pos.add((px + 1, py - 1))
-                            self.field.opened[py - 1][px + 1] = True
+                            if self.field.opened[py - 1][px + 1] is False:
+                                pos.add((px + 1, py - 1))
+                                self.field.opened[py - 1][px + 1] = True
                             if self.field.status[py - 1][px + 1] == 0:
                                 queue.put((px + 1, py - 1))
                     if py + 1 < self.field.height:
                         if not (px + 1, py + 1) in pos and self.field.status[py + 1][px + 1] != -1:
-                            pos.add((px + 1, py + 1))
-                            self.field.opened[py + 1][px + 1] = True
+                            if self.field.opened[py + 1][px + 1] is False:
+                                pos.add((px + 1, py + 1))
+                                self.field.opened[py + 1][px + 1] = True
                             if self.field.status[py + 1][px + 1] == 0:
                                 queue.put((px + 1, py + 1))
                     if not (px + 1, py) in pos and self.field.status[py][px + 1] != -1:
-                        pos.add((px + 1, py))
-                        self.field.opened[py][px + 1] = True
+                        if self.field.opened[py][px + 1] is False: 
+                            pos.add((px + 1, py))
+                            self.field.opened[py][px + 1] = True
                         if self.field.status[py][px + 1] == 0:
                             queue.put((px + 1, py))
         return self.pokeOutPut(pos)
@@ -179,7 +191,7 @@ class MineShell:
     def pokeOutPut(self, pos):
         out = [] 
         for (x, y) in pos :
-            out.append(str(x) + self.space + str(y) + self.space + 'opened as' + self.space + str(self.field.status[x][y]))
+            out.append(str(x) + self.space + str(y) + self.space + 'opened as' + self.space + str(self.field.status[y][x]))
         return out
 
 

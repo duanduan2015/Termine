@@ -41,8 +41,12 @@ O(1): <x> <y> flagged
 I: unflag <x> <y>
 O(1): <x> <y> unflagged
 
+I: deploy <x> <y>
+O(1): <x> <y> deployed
+
 I: toggle <x> <y>
 O(1): <x> <y> flagged
 O(2): <x> <y> unflagged
 ---
+
 O(?): no minefield
