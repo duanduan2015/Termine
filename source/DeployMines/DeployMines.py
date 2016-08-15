@@ -12,7 +12,7 @@ class DeployMines:
         miney = random.sample(y, self.num)
         for i in range(len(minex)) :
             self.deploy(minex[i], miney[i])
-            print(minex[i], miney[i])
+            #print(minex[i], miney[i])
 
     def deploy(self, x, y):
         self.field.status[y][x] = -1
@@ -21,7 +21,7 @@ class DeployMines:
             s = str()
             for j in range(self.field.width):
                 s = s + str(self.field.status[i][j])
-            print(s) 
+            #print(s) 
 
     def updateStatusAround(self, x, y):
         height = self.field.height

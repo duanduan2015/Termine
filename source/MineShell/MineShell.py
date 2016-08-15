@@ -100,8 +100,8 @@ class MineShell:
             return 'out of bounds'
         if self.field.flagged[y][x] == True:
             return 'flagged'
-        if self.field.opened[y][x] == False:
-            return 'unexplored'    
+        #if self.field.opened[y][x] == False:
+        #    return 'unexplored'    
         return str(self.field.status[y][x])
 
 
