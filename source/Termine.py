@@ -7,7 +7,8 @@ def Main(stdscr):
     # Clear screen
     stdscr.clear()
     stdscr.refresh()
-    curses.mousemask(1)
+    curses.mousemask(curses.BUTTON1_PRESSED)
+    curses.curs_set(0)
     #height, width = stdscr.getmaxyx()
     vline = curses.ACS_VLINE
     hline = curses.ACS_HLINE
@@ -20,6 +21,7 @@ def Main(stdscr):
     uprcor = curses.ACS_URCORNER
     lolcor = curses.ACS_LLCORNER
     lorcor = curses.ACS_LRCORNER
+    block = curses.ACS_BLOCK
     width = 16 
     height = 16 
     numMines = 15 
@@ -74,21 +76,28 @@ def Main(stdscr):
     out = shell.getInput(create)
     halfx = (numhlines + 1) / 2
     halfy = (numvlines + 1) / 2
-    #for x in range (startx, xend):
-    #    for y in range (starty, yend):
-    #        disx = x - startx
-    #        disy = y - starty
-    #        if (disx % halfx == 0) and (disx / halfx) % 2 != 0:
-    #            if (disy % halfy == 0) and (disy / halfy) % 2 != 0:
-    #                fieldx = int((disx / halfx - 1) / 2)
-    #                fieldy = int((disy / halfy - 1) / 2)
-    #                cmd = 'peek' + ' ' + str(fieldx) + ' ' + str(fieldy)
-    #                num = int(shell.getInput(cmd))
-    #                if num < 0:
-    #                    num = '*'
-    #                else:
-    #                    num = str(num)
-    #                stdscr.addch(y, x, ord(num))
+
+    for x in range (startx, xend):
+        for y in range (starty, yend):
+            disx = x - startx
+            disy = y - starty
+            if (disx % halfx == 0) and (disx / halfx) % 2 != 0:
+                if (disy % halfy == 0) and (disy / halfy) % 2 != 0:
+                    fieldx = int((disx / halfx - 1) / 2)
+                    fieldy = int((disy / halfy - 1) / 2)
+                    #cmd = 'peek' + ' ' + str(fieldx) + ' ' + str(fieldy)
+                    #num = int(shell.getInput(cmd))
+                    #if num < 0:
+                    #    num = '*'
+                    #else:
+                    #    num = str(num)
+                    #stdscr.addch(y + 1, x, ord(' '), curses.A_REVERSE)
+                    #stdscr.addch(y - 1, x, ord(' '), curses.A_REVERSE)
+                    stdscr.addch(y, x, ord(' '), curses.A_REVERSE)
+                    stdscr.addch(y, x + 1, ord(' '), curses.A_REVERSE)
+                    stdscr.addch(y, x - 1, ord(' '), curses.A_REVERSE)
+                    #stdscr.addch(y, x + 2, ord(' '), curses.A_REVERSE)
+                    #stdscr.addch(y, x - 2, ord(' '), curses.A_REVERSE)
 
     print(out)
     while True:
@@ -108,7 +117,10 @@ def Main(stdscr):
                 ylist.append(my - i)
                 ylist.append(my + i)
 
+            stop = False
             for x in xlist:
+                if stop:
+                    break
                 for y in ylist:
                     disx = x - startx
                     disy = y - starty
@@ -117,16 +129,31 @@ def Main(stdscr):
                             fieldx = int((disx / halfx - 1) / 2)
                             fieldy = int((disy / halfy - 1) / 2)
                             if fieldx >= width or fieldy >= height:
-                                    continue
-                            cmd = 'peek' + ' ' + str(fieldx) + ' ' + str(fieldy)
-                            num = int(shell.getInput(cmd))
-                            if num < 0:
-                                num = '*'
-                            else:
-                                num = str(num)
-                            stdscr.addch(y, x, ord(num))
-                            break
-        stdscr.refresh()
-        continue
+                                continue
+                            peek = 'peek' + ' ' + str(fieldx) + ' ' + str(fieldy)
+                            poke = 'poke' + ' ' + str(fieldx) + ' ' + str(fieldy)
+                            num = int(shell.getInput(peek))
+                            pokeOut = shell.getInput(poke)
+                            if isinstance(pokeOut, list):
+                                openedx = []
+                                openedy = []
+                                nums = []
+                                for out in pokeOut:
+                                    string = out.split(' ')
+                                    minex = int(string[0])
+                                    miney = int(string[1])
+                                    wx = startx + minex * 2 * halfx + halfx
+                                    wy = starty + miney * 2 * halfy + halfy 
+                                    openedx.append(int(wx))
+                                    openedy.append(int(wy))
+                                    nums.append(int(string[4]))
+                                for i in range(len(nums)):
+                                    stdscr.addch(openedy[i], openedx[i], ord(str(nums[i])))
+                                    stdscr.addch(openedy[i], openedx[i] - 1, ord(' '))
+                                    stdscr.addch(openedy[i], openedx[i] + 1, ord(' '))
+                                stop = True
+                                break
+            stdscr.refresh()
+            #continue
 wrapper(Main)
 

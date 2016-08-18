@@ -1,12 +1,8 @@
 #!/usr/bin/env python3
 
 from MineShell.MineShell import MineShell
-import curses
 def Main():
     s = MineShell()
-    stdscr = curses.initscr()
-    print(curses.LINES)
-    print(curses.COLS)
     while True:
         a = input("termine> ")
         out = s.getInput(a)
