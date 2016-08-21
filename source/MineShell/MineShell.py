@@ -7,12 +7,9 @@ class MineShell:
         self.space = ' '
         self.flagNum = 0
         self.mineNum = 0
-        #self.deploy = None
 
     def getInput(self, string):
         strings = string.split(' ')
-        #for s in strings:
-            #print(s)
         if (strings[0] == 'minefield'):
             return self.createMineField(int(strings[2]), int(strings[1]), int(strings[3]))
         if (strings[0] == 'poke'):
@@ -23,8 +20,6 @@ class MineShell:
             return self.flag(int(strings[1]), int(strings[2]))
         if (strings[0] == 'unflag'):
             return self.unflag(int(strings[1]), int(strings[2]))
-        if strings[0] == 'deploy':
-            return self.deploy(int(strings[1]), int(strings[2]))
         if (strings[0] == 'query'):
             if strings[1] == 'flags':
                 return str(self.flagNum)
@@ -39,33 +34,6 @@ class MineShell:
                     return 'yes'
                 else:
                     return 'no'
-    def deploy(self, x, y):
-        if x < 0 or x >= self.field.width or y < 0 or y >= self.field.height:
-            return 'out of bounds'
-        self.field.status[y][x] = -1
-        self.updateStatusAround(x, y)
-        return str(x) + self.space + str(y) + self.space + 'deployed'
-    def updateStatusAround(self, x, y):
-        height = self.field.height
-        width = self.field.width
-        if y - 1 >= 0:
-            self.field.status[y - 1][x] += 1
-        if y + 1 < height:
-            self.field.status[y + 1][x] += 1
-        if x - 1 >= 0:
-            self.field.status[y][x - 1] += 1
-        if x + 1 < width:
-            self.field.status[y][x + 1] += 1
-        if y - 1 >= 0 and x - 1 >= 0:
-            self.field.status[y - 1][x - 1] += 1
-        if y + 1 < height and x + 1 < width:
-            self.field.status[y + 1][x + 1] += 1
-        if y - 1 >= 0 and x + 1 > width:
-            self.field.status[y - 1][x + 1] += 1
-        if y + 1 < height and x - 1 >= 0:
-            self.field.status[y + 1][x - 1] += 1
-        
-
 
     def isSuccess(self):
         if self.flagNum != self.mineNum:
@@ -120,9 +88,10 @@ class MineShell:
             return 'out of bounds'
         status = self.field.status[y][x]
         if (status == -1) :
-            return 'boom'
+            return 'b'
         else:
             pos =  set()
+            pos.add((x,y))
             queue = Queue()
             queue.put((x,y))
             self.field.opened[y][x] = True
