@@ -10,11 +10,6 @@ def Main(stdscr):
     curses.mousemask(curses.BUTTON1_PRESSED)
     curses.mouseinterval(0)
     curses.curs_set(0)
-    #logWin = curses.newwin(16, 16)
-    #logWin.clear()
-    #logWin.addstr(2, 3, 'hello')
-    #logWin.refresh()
-    #height, width = stdscr.getmaxyx()
     vline = curses.ACS_VLINE
     hline = curses.ACS_HLINE
     topT = curses.ACS_TTEE
