@@ -14,29 +14,68 @@ def Main(stdscr):
     out = shell.getInput(createField)
     stdscr.addstr(1, 1, out)
     stdscr.refresh()
-    mine, log, panel = drawWindowLayout(stdscr)
-    drawOriginalMineField(mine, mineFieldWidth, mineFieldHeight)
+    mine, log, panel = drawWindowLayout(stdscr, mineFieldWidth, mineFieldHeight)
+    drawUndeployedMineField(mine, mineFieldWidth, mineFieldHeight)
     while True:
+        if shell.getInput('query success'):
+            stdscr.addstr(2, 1, 'Success')
         event = stdscr.getch()
         if event == ord("q"): break 
         if event == curses.KEY_MOUSE:
-            _, mx, my, _, _ = curses.getmouse()
-            pokeMineField(my, mx, shell, mine, mineFieldWidth, mineFieldHeight)
+            _, mx, my, _, bstate = curses.getmouse()
+            if bstate & curses.BUTTON1_PRESSED :
+                pokeMineField(my, mx, shell, mine)
+            elif bstate & curses.BUTTON3_PRESSED:
+                flagMineField(my, mx, shell, mine)
             continue
-
-def pokeMineField(y, x, shell, mineWin, width, height):
+def flagMineField(y, x, shell, mineWin):
+    starty, startx = mineWin.getbegyx()
     unitx = const.numhlines + 1
     unity = const.numvlines + 1
-    if x % (unitx)  == 0 and y % (unity) == 0:
+    y, x = y - starty, x - startx
+    if x % (unitx)  == 0 or y % (unity) == 0:
         return
     fieldx = (int)(x / unitx)
     fieldy = (int)(y / unity)
-    if fieldx >= width or fieldy >= height:
-        return 
+    flag = 'flag' + ' ' + str(fieldx) + ' ' + str(fieldy)
+    out = shell.getInput(flag)
+    wx = fieldx * unitx + const.numhlines - 1
+    wy = fieldy * unity + const.numvlines
+    mineWin.addstr(wy, wx, '$')
+    mineWin.addch(wy, wx - 1, ord(' '))
+    mineWin.addch(wy, wx + 1, ord(' '))
+    mineWin.refresh()
+
+def peekMineField(y, x, shell, mineWin):
+    starty, startx = mineWin.getbegyx()
+    unitx = const.numhlines + 1
+    unity = const.numvlines + 1
+    y, x = y - starty, x - startx
+    if x % (unitx)  == 0 or y % (unity) == 0:
+        return
+    fieldx = (int)(x / unitx)
+    fieldy = (int)(y / unity)
+    peek = 'peek' + ' ' + str(fieldx) + ' ' + str(fieldy)
+    num = shell.getInput(peek)
+    wx = fieldx * unitx + const.numhlines - 1
+    wy = fieldy * unity + const.numvlines
+    mineWin.addstr(wy, wx, num)
+    mineWin.addch(wy, wx - 1, ord(' '))
+    mineWin.addch(wy, wx + 1, ord(' '))
+    mineWin.refresh()
+
+
+def pokeMineField(y, x, shell, mineWin):
+    starty, startx = mineWin.getbegyx()
+    y, x = y - starty, x - startx
+    unitx = const.numhlines + 1
+    unity = const.numvlines + 1
+    if x % (unitx)  == 0 or y % (unity) == 0:
+        return
+    fieldx = (int)(x / unitx)
+    fieldy = (int)(y / unity)
     poke = 'poke' + ' ' + str(fieldx) + ' ' + str(fieldy)
     pokeOut = shell.getInput(poke)
-    halfx = unitx / 2
-    halfy = unity / 2
     if isinstance(pokeOut, list):
         openedx = []
         openedy = []
@@ -45,34 +84,38 @@ def pokeMineField(y, x, shell, mineWin, width, height):
             string = out.split(' ')
             minex = int(string[0])
             miney = int(string[1])
-            wx = 0 + minex * 2 * halfx + halfx
-            wy = 0 + miney * 2 * halfy + halfy 
+            wx = minex * unitx + const.numhlines - 1
+            wy = miney * unity + const.numvlines
             openedx.append(int(wx))
             openedy.append(int(wy))
-            nums.append(int(string[4]))
+            nums.append(string[4])
         for i in range(len(nums)):
-            mineWin.addch(openedy[i], openedx[i], ord(str(nums[i])))
+            if len(nums[i]) > 1:
+                nums[i] = 'b'
+            mineWin.addch(openedy[i], openedx[i], ord(nums[i]))
+            #mineWin.addstr(openedy[i], openedx[i], str(nums[i]))
             mineWin.addch(openedy[i], openedx[i] - 1, ord(' '))
             mineWin.addch(openedy[i], openedx[i] + 1, ord(' '))
-    elif isinstance(pokeOut, str):
-        wx = (int)(0 + fieldx * 2 * halfx + halfx)
-        wy = (int)(0 + fieldy * 2 * halfy + halfy)
-        mineWin.addstr(wy, wx, str(pokeOut))
-        mineWin.addstr(wy, wx - 1, ' ')
-        mineWin.addstr(wy, wx + 1, ' ')
+        mineWin.refresh()
+    else:
+        return
+    #elif isinstance(pokeOut, str):
+    #    wx = (int)(0 + fieldx * 2 * halfx + halfx)
+    #    wy = (int)(0 + fieldy * 2 * halfy + halfy)
+    #    mineWin.addstr(wy, wx, str(pokeOut))
+    #    mineWin.addstr(wy, wx - 1, ' ')
+    #    mineWin.addstr(wy, wx + 1, ' ')
     mineWin.refresh()
 
 def setCursesFeatures():
-    curses.mousemask(curses.BUTTON1_PRESSED)
+    curses.mousemask(-1)
     curses.mouseinterval(0)
     curses.curs_set(0)
 
-def drawOriginalMineField(mineWin, width, height):
+def drawUndeployedMineField(mineWin, width, height):
     windowHeight, windowWidth = mineWin.getmaxyx()
     fieldWidth = (const.numhlines + 1) * width
     fieldHeight = (const.numvlines + 1) * height
-    #starty = (int)((windowHeight - fieldHeight) / 2) 
-    #startx = (int)((windowWidth - fieldWidth) / 2)
     starty, startx = 0, 0
     xindex, yindex = startx, starty
     xend = xindex + fieldWidth
@@ -129,7 +172,7 @@ def drawOriginalMineField(mineWin, width, height):
                     mineWin.addch(y, x - 1, ord(' '), curses.A_REVERSE)
     mineWin.refresh()
 
-def drawWindowLayout(stdscr):
+def drawWindowLayout(stdscr, fwidth, fheight):
     #stdscr.border()
     #stdscr.refresh()
     height, width = stdscr.getmaxyx()
@@ -139,9 +182,12 @@ def drawWindowLayout(stdscr):
     mineLines = 7 * heightDividor
     mineColumns = width - logColumns - paddingMineLog
     paddingTop = 3
-    mineWin = curses.newwin(mineLines, mineColumns, paddingTop, 0)
-    mineWin.border()
-    mineWin.refresh()
+    windowHeight, windowWidth = mineLines, mineColumns
+    fieldWidth = (const.numhlines + 1) * (fwidth + 1)
+    fieldHeight = (const.numvlines + 1) * (fheight + 1)
+    starty = (int)((windowHeight - fieldHeight) / 2) 
+    startx = (int)((windowWidth - fieldWidth) / 2)
+    mineWin = curses.newwin(fieldHeight, fieldWidth, starty + paddingTop, startx)
     logLines = mineLines
     logWin = curses.newwin(logLines, logColumns, 3, mineColumns + paddingMineLog)
     logWin.border()
