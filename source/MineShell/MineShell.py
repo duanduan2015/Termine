@@ -63,20 +63,20 @@ class MineShell:
         return True
 
     def flag(self, x, y):
-        if x < 0 or x >= self.field.width or y < 0 or y >= self.field.height:
-            return 'out of bounds'
-        if self.field.flagged[y][x] ==  False:
+        if self.field.opened[y][x] == False and self.field.flagged[y][x] ==  False:
             self.field.flagged[y][x] = True
             self.flagNum = self.flagNum + 1
-        return str(x) + self.space + str(y) + self.space + 'flagged'
+            return str(x) + self.space + str(y) + self.space + 'flagged'
+        else:
+            return None
 
     def unflag(self, x, y):
-        if x < 0 or x >= self.field.width or y < 0 or y >= self.field.height:
-            return 'out of bounds'
-        if self.field.flagged[y][x] == True:
+        if self.field.opened[y][x] == False and self.field.flagged[y][x] == True:
             self.field.flagged[y][x] = False
             self.flagNum = self.flagNum - 1
-        return str(x) + self.space + str(y) + self.space + 'unflagged'
+            return str(x) + self.space + str(y) + self.space + 'unflagged'
+        else:
+            return None
  
 
     
@@ -168,6 +168,7 @@ class MineShell:
         pos =  set()
         if self.field.status[y][x] == -1 :
             pos.add((x, y))
+            self.field.opened[y][x] = True
             return pos 
         else:
             if self.field.flagged[y][x] == True:

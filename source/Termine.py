@@ -17,8 +17,7 @@ def Main(stdscr):
     mine, log, panel = drawWindowLayout(stdscr, mineFieldWidth, mineFieldHeight)
     drawUndeployedMineField(mine, mineFieldWidth, mineFieldHeight)
     while True:
-        if shell.getInput('query success'):
-            stdscr.addstr(2, 1, 'Success')
+        queryGameStatus(shell, stdscr)
         event = stdscr.getch()
         if event == ord("q"): break 
         if event == curses.KEY_MOUSE:
@@ -26,8 +25,39 @@ def Main(stdscr):
             if bstate & curses.BUTTON1_PRESSED :
                 pokeMineField(my, mx, shell, mine)
             elif bstate & curses.BUTTON3_PRESSED:
-                flagMineField(my, mx, shell, mine)
+                alreadyFlagged = flagMineField(my, mx, shell, mine)
+                if alreadyFlagged:
+                    unflagMineField(my, mx, shell, mine)
             continue
+
+def queryGameStatus(shell, stdscr):
+    if shell.getInput('query success'):
+        stdscr.addstr(2, 1, 'Success')
+    flags = shell.getInput('query flags')
+    mines = shell.getInput('query mines')
+    stdscr.addstr(3, 1, str(flags) + '/' + str(mines))
+
+        
+def unflagMineField(y, x, shell, mineWin):
+    starty, startx = mineWin.getbegyx()
+    unitx = const.numhlines + 1
+    unity = const.numvlines + 1
+    y, x = y - starty, x - startx
+    if x % (unitx)  == 0 or y % (unity) == 0:
+        return
+    fieldx = (int)(x / unitx)
+    fieldy = (int)(y / unity)
+    flag = 'unflag' + ' ' + str(fieldx) + ' ' + str(fieldy)
+    out = shell.getInput(flag)
+    if out == None:
+        return
+    wx = fieldx * unitx + const.numhlines - 1
+    wy = fieldy * unity + const.numvlines
+    mineWin.addch(wy, wx, ord(' '), curses.A_REVERSE)
+    mineWin.addch(wy, wx - 1, ord(' '), curses.A_REVERSE)
+    mineWin.addch(wy, wx + 1, ord(' '), curses.A_REVERSE)
+    mineWin.refresh()
+
 def flagMineField(y, x, shell, mineWin):
     starty, startx = mineWin.getbegyx()
     unitx = const.numhlines + 1
@@ -39,12 +69,15 @@ def flagMineField(y, x, shell, mineWin):
     fieldy = (int)(y / unity)
     flag = 'flag' + ' ' + str(fieldx) + ' ' + str(fieldy)
     out = shell.getInput(flag)
+    if out == None:
+        return True 
     wx = fieldx * unitx + const.numhlines - 1
     wy = fieldy * unity + const.numvlines
     mineWin.addstr(wy, wx, '$')
     mineWin.addch(wy, wx - 1, ord(' '))
     mineWin.addch(wy, wx + 1, ord(' '))
     mineWin.refresh()
+    return False 
 
 def peekMineField(y, x, shell, mineWin):
     starty, startx = mineWin.getbegyx()
