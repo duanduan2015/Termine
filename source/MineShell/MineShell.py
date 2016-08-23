@@ -12,14 +12,33 @@ class MineShell:
         strings = string.split(' ')
         if (strings[0] == 'minefield'):
             return self.createMineField(int(strings[2]), int(strings[1]), int(strings[3]))
+        if self.field == None:
+            return 'no minefield'
         if (strings[0] == 'poke'):
-            return self.poke(int(strings[1]), int(strings[2]))
+            x = int(strings[1])
+            y = int(strings[2])
+            if not self.checkPositionValid(x, y):
+                return 'out of bounds'
+            pos =  self.poke(x, y)
+            return self.pokeOutPut(pos)
         if (strings[0] == 'peek'):
-            return self.peek(int(strings[1]), int(strings[2]))
+            x = int(strings[1])
+            y = int(strings[2])
+            if not self.checkPositionValid(x, y):
+                return 'out of bounds'
+            return self.peek(x, y)
         if (strings[0] == 'flag'):
-            return self.flag(int(strings[1]), int(strings[2]))
+            x = int(strings[1])
+            y = int(strings[2])
+            if not self.checkPositionValid(x, y):
+                return 'out of bounds'
+            return self.flag(x, y)
         if (strings[0] == 'unflag'):
-            return self.unflag(int(strings[1]), int(strings[2]))
+            x = int(strings[1])
+            y = int(strings[2])
+            if not self.checkPositionValid(x, y):
+                return 'out of bounds'
+            return self.unflag(x, y)
         if (strings[0] == 'query'):
             if strings[1] == 'flags':
                 return str(self.flagNum)
@@ -133,30 +152,29 @@ class MineShell:
             elif self.field.opened[y - 1][x - 1] == False:
                 pos.add((x - 1, y - 1))
 
+        totalPos = set() 
         if numflag == num:
-            return self.pokeOutPut(pos)
+            for (x, y) in pos:
+                totalPos = totalPos | self.poke(x, y)
+            return totalPos 
         else:
-            return self.pokeOutPut(set())
+            return totalPos 
 
 
 
 
 
     def poke(self, x, y):
-        if (self.field == None):
-            return 'no minefield'
-        if (x < 0 or x >= self.field.width or y < 0 or y >= self.field.width):
-            return 'out of bounds'
-        status = self.field.status[y][x]
-        if (status == -1) :
-            return 'b'
+        pos =  set()
+        if self.field.status[y][x] == -1 :
+            pos.add((x, y))
+            return pos 
         else:
             if self.field.flagged[y][x] == True:
-                return
+                return pos
             if self.field.opened[y][x] == True:
                 return self.pokeOpenedMine(x, y)
             else:
-                pos =  set()
                 pos.add((x,y))
                 queue = deque()
                 if self.field.status[y][x] == 0:
@@ -214,7 +232,8 @@ class MineShell:
                             if self.field.status[py + 1][px - 1] == 0:
                                 queue.append((px - 1, py + 1))
                         
-                return self.pokeOutPut(pos)
+                #return self.pokeOutPut(pos)
+                return pos
 
     def pokeOutPut(self, pos):
         out = [] 
