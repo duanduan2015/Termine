@@ -7,6 +7,7 @@ class MineShell:
         self.space = ' '
         self.flagNum = 0
         self.mineNum = 0
+        self.firstPoke = True
 
     def getInput(self, string):
         strings = string.split(' ')
@@ -97,8 +98,6 @@ class MineShell:
     def createMineField(self, height, width, numOfMines):
         self.field = MineField(height, width) 
         self.mineNum = numOfMines
-        d = DeployMines(self.field, numOfMines)
-        d.deployField()
         return 'created minefield ' + str(width) + ' x ' + str(height) + ' with ' + str(numOfMines)+' mines'
 
     def pokeOpenedMine(self, x, y):
@@ -165,6 +164,10 @@ class MineShell:
 
 
     def poke(self, x, y):
+        if self.firstPoke:
+            d = DeployMines(self.field, self.mineNum, x, y)
+            d.deployField()
+            self.firstPoke = False
         pos =  set()
         if self.field.status[y][x] == -1 :
             pos.add((x, y))
