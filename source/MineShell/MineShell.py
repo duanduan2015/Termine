@@ -68,6 +68,7 @@ class MineShell:
     def flag(self, x, y):
         if self.field.opened[y][x] == False and self.field.flagged[y][x] ==  False:
             self.field.flagged[y][x] = True
+            self.field.opened[y][x] = True
             self.flagNum = self.flagNum + 1
             return str(x) + self.space + str(y) + self.space + 'flagged'
         else:
@@ -171,7 +172,7 @@ class MineShell:
             d.deployField()
             self.firstPoke = False
         pos =  set()
-        if self.field.status[y][x] == -1 :
+        if self.field.status[y][x] == -1 and self.field.flagged[y][x] == False:
             pos.add((x, y))
             self.field.opened[y][x] = True
             return pos 
