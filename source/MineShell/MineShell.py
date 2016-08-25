@@ -53,16 +53,18 @@ class MineShell:
                 return self.isSuccess()
 
     def isSuccess(self):
-        if self.flagNum != self.mineNum:
-            return False
+        #if self.flagNum != self.mineNum:
+        #    return False
         for y in range(self.field.height):
             for x in range(self.field.width):
-                if self.field.opened[y][x] == False and self.field.flagged[y][x] == False:
+                if self.field.status[y][x] != -1 and self.field.opened[y][x] == False:
                     return False
-                if self.field.status[y][x] == -1 and self.field.flagged[y][x] == False:
-                    return False
-                if self.field.status[y][x] != -1 and self.field.flagged[y][x] == True:
-                    return False
+                #if self.field.opened[y][x] == False and self.field.flagged[y][x] == False:
+                #    return False
+                #if self.field.status[y][x] == -1 and self.field.flagged[y][x] == False:
+                #    return False
+                #if self.field.status[y][x] != -1 and self.field.flagged[y][x] == True:
+                #    return False
         return True
 
     def flag(self, x, y):
