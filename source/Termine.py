@@ -2,14 +2,18 @@
 import time
 import curses
 import const
+import sys
 from curses import wrapper
 from MineShell.MineShell import MineShell
 
+
 def Main(stdscr):
-    mineFieldWidth = 16
-    mineFieldHeight = 16 
-    numMines = 40 
     setCursesFeatures()
+    if sys.argv[1] == 'help':
+        curses.endwin()
+        helpInfo()
+        sys.exit(1) 
+    mineFieldWidth, mineFieldHeight, numMines, mode = parseArgs(sys.argv)
     shell = MineShell()
     createField = 'minefield ' + str(mineFieldWidth) + ' ' + str(mineFieldHeight) + ' ' + str(numMines)
     out = shell.getInput(createField)
@@ -32,6 +36,29 @@ def Main(stdscr):
         if checkSuccess(shell):
             displayGameOver(stdscr, mine, mineFieldWidth, mineFieldHeight, True)
             continue
+
+def helpInfo():
+    print('If you want to play standard mode, please enter:')
+    print('python3 Termine.py easy/medium/hard')
+    print('If you want to play your own customized mode, pleas enter:')
+    print('python3 Termine.py customized <width> <height> <numOfMines>')
+    
+
+
+
+
+def parseArgs(args):
+    if args[1] == 'easy':
+        return (8, 8, 10, 'easy')
+    if args[1] == 'medium':
+        return (16, 16, 40, 'medium')
+    if args[1] == 'hard':
+        return (32, 16, 99, 'hard')
+    if args[1] == 'customized':
+        width = int(args[2])
+        height = int(args[3])
+        num = int(args[4])
+        return (width, height, num, 'customized')
 
 def checkSuccess(shell):
     return shell.getInput('query success')
