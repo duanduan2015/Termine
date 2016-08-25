@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
+import time
 import curses
 import const
 from curses import wrapper
 from MineShell.MineShell import MineShell
 
 def Main(stdscr):
-    mineFieldWidth = 16 
+    mineFieldWidth = 16
     mineFieldHeight = 16 
     numMines = 40 
     setCursesFeatures()
@@ -23,16 +24,19 @@ def Main(stdscr):
         if event == curses.KEY_MOUSE:
             _, mx, my, _, bstate = curses.getmouse()
             if bstate & curses.BUTTON1_PRESSED :
-                pokeMineField(my, mx, shell, mine)
+                pokeMineField(stdscr, my, mx, shell, mine)
             elif bstate & curses.BUTTON3_PRESSED:
                 alreadyFlagged = flagMineField(my, mx, shell, mine)
                 if alreadyFlagged:
                     unflagMineField(my, mx, shell, mine)
+        if checkSuccess(shell):
+            displayGameOver(stdscr, mine, mineFieldWidth, mineFieldHeight, True)
             continue
 
+def checkSuccess(shell):
+    return shell.getInput('query success')
+
 def queryGameStatus(shell, stdscr):
-    if shell.getInput('query success'):
-        stdscr.addstr(2, 1, 'Success')
     flags = shell.getInput('query flags')
     mines = shell.getInput('query mines')
     stdscr.addstr(3, 1, str(flags) + '/' + str(mines))
@@ -73,7 +77,8 @@ def flagMineField(y, x, shell, mineWin):
         return True 
     wx = fieldx * unitx + const.numhlines - 1
     wy = fieldy * unity + const.numvlines
-    mineWin.addstr(wy, wx, '$')
+    attr = curses.A_BOLD | curses.color_pair(7) 
+    mineWin.addstr(wy, wx, '$', attr)
     mineWin.addch(wy, wx - 1, ord(' '))
     mineWin.addch(wy, wx + 1, ord(' '))
     mineWin.refresh()
@@ -98,7 +103,7 @@ def peekMineField(y, x, shell, mineWin):
     mineWin.refresh()
 
 
-def pokeMineField(y, x, shell, mineWin):
+def pokeMineField(stdscr, y, x, shell, mineWin):
     starty, startx = mineWin.getbegyx()
     y, x = y - starty, x - startx
     unitx = const.numhlines + 1
@@ -122,25 +127,38 @@ def pokeMineField(y, x, shell, mineWin):
             openedx.append(int(wx))
             openedy.append(int(wy))
             nums.append(string[4])
+            number = 0
         for i in range(len(nums)):
             if len(nums[i]) > 1:
-                nums[i] = 'b'
-            mineWin.addch(openedy[i], openedx[i], ord(nums[i]))
-            #mineWin.addstr(openedy[i], openedx[i], str(nums[i]))
-            mineWin.addch(openedy[i], openedx[i] - 1, ord(' '))
-            mineWin.addch(openedy[i], openedx[i] + 1, ord(' '))
+                mineWin.addstr(openedy[i], openedx[i], ':(' ) 
+                displayGameOver(stdscr, mineWin, shell.field.width, shell.field.height, False)
+                return 
+            else:
+                number = int(nums[i])
+                if number >= 5:
+                    number = 5 
+            attr = 0
+            if number == 0:
+                attr = curses.A_BOLD | curses.color_pair(number + 1) | curses.A_DIM
+            else:
+                attr = curses.A_BOLD | curses.color_pair(number + 1) 
+            mineWin.addch(openedy[i], openedx[i], ord(nums[i]), attr) 
+            mineWin.addch(openedy[i], openedx[i] - 1, ord(' '), attr)
+            mineWin.addch(openedy[i], openedx[i] + 1, ord(' '), attr)
         mineWin.refresh()
     else:
         return
-    #elif isinstance(pokeOut, str):
-    #    wx = (int)(0 + fieldx * 2 * halfx + halfx)
-    #    wy = (int)(0 + fieldy * 2 * halfy + halfy)
-    #    mineWin.addstr(wy, wx, str(pokeOut))
-    #    mineWin.addstr(wy, wx - 1, ' ')
-    #    mineWin.addstr(wy, wx + 1, ' ')
     mineWin.refresh()
 
 def setCursesFeatures():
+    curses.start_color()
+    curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK)
+    curses.init_pair(3, curses.COLOR_GREEN, curses.COLOR_BLACK)
+    curses.init_pair(6, curses.COLOR_BLUE, curses.COLOR_BLACK)
+    curses.init_pair(2, curses.COLOR_CYAN, curses.COLOR_BLACK)
+    curses.init_pair(4, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+    curses.init_pair(5, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
+    curses.init_pair(7, curses.COLOR_RED, curses.COLOR_BLACK)
     curses.mousemask(-1)
     curses.mouseinterval(0)
     curses.curs_set(0)
@@ -153,41 +171,42 @@ def drawUndeployedMineField(mineWin, width, height):
     xindex, yindex = startx, starty
     xend = xindex + fieldWidth
     yend = yindex + fieldHeight 
-    mineWin.addch(starty, startx, curses.ACS_ULCORNER)
-    mineWin.addch(starty + (const.numvlines + 1) * height, startx, curses.ACS_LLCORNER)
-    mineWin.addch(starty, startx + (const.numhlines + 1) * width, curses.ACS_URCORNER)
-    mineWin.addch(starty + (const.numvlines + 1) * height, startx + (const.numhlines + 1) * width, curses.ACS_LRCORNER)
+    attr = curses.A_BOLD | curses.color_pair(1)
+    mineWin.addch(starty, startx, curses.ACS_ULCORNER, attr)
+    mineWin.addch(starty + (const.numvlines + 1) * height, startx, curses.ACS_LLCORNER, attr)
+    mineWin.addch(starty, startx + (const.numhlines + 1) * width, curses.ACS_URCORNER, attr)
+    mineWin.addch(starty + (const.numvlines + 1) * height, startx + (const.numhlines + 1) * width, curses.ACS_LRCORNER, attr)
     for x in range(xindex + 1, xend):
         if (x - startx) % (const.numhlines + 1) == 0:
-            mineWin.addch(yindex, x, curses.ACS_TTEE)
+            mineWin.addch(yindex, x, curses.ACS_TTEE, attr)
             for y in range(yindex + 1, yend):
                 if (y - starty) % (const.numvlines + 1) != 0:
-                    mineWin.addch(y, x, curses.ACS_VLINE)
+                    mineWin.addch(y, x, curses.ACS_VLINE, attr)
         else:
-            mineWin.addch(yindex, x, curses.ACS_HLINE)
+            mineWin.addch(yindex, x, curses.ACS_HLINE, attr)
 
     for x in range(xindex + 1, xend):
         if (x - startx) % (const.numhlines + 1) == 0:
-            mineWin.addch(yend, x, curses.ACS_BTEE)
+            mineWin.addch(yend, x, curses.ACS_BTEE, attr)
         else:
-            mineWin.addch(yend, x, curses.ACS_HLINE)
+            mineWin.addch(yend, x, curses.ACS_HLINE, attr)
 
     for y in range(yindex + 1, yend):
         if (y - starty) % (const.numvlines + 1) == 0:
-            mineWin.addch(y, startx, curses.ACS_LTEE)
+            mineWin.addch(y, startx, curses.ACS_LTEE, attr)
             for x in range(xindex + 1, xend):
                 if (x - startx) % (const.numhlines + 1) == 0:
-                    mineWin.addch(y, x, curses.ACS_PLUS)
+                    mineWin.addch(y, x, curses.ACS_PLUS, attr)
                 else:
-                    mineWin.addch(y, x, curses.ACS_HLINE)
+                    mineWin.addch(y, x, curses.ACS_HLINE, attr)
         else:
-            mineWin.addch(y, startx, curses.ACS_VLINE)
+            mineWin.addch(y, startx, curses.ACS_VLINE, attr)
 
     for y in range(yindex + 1, yend):
         if (y - starty) % (const.numvlines + 1) == 0:
-            mineWin.addch(y, xend, curses.ACS_RTEE)
+            mineWin.addch(y, xend, curses.ACS_RTEE, attr)
         else:
-            mineWin.addch(y, xend, curses.ACS_VLINE)
+            mineWin.addch(y, xend, curses.ACS_VLINE, attr)
 
     halfx = (const.numhlines + 1) / 2
     halfy = (const.numvlines + 1) / 2
@@ -233,5 +252,56 @@ def drawWindowLayout(stdscr, fwidth, fheight):
     panelWin.refresh()
     return (mineWin, logWin, panelWin)
 
+def displayGameOver(stdscr, mineWin, width, height, success):
+    fieldWidth = (const.numhlines + 1) * width
+    fieldHeight = (const.numvlines + 1) * height
+    xend = fieldWidth
+    yend = fieldHeight 
+    halfx = (const.numhlines + 1) / 2
+    halfy = (const.numvlines + 1) / 2
+    for x in range (0, xend):
+        for y in range (0, yend):
+            disx = x
+            disy = y
+            if (disx % halfx == 0) and (disx / halfx) % 2 != 0:
+                if (disy % halfy == 0) and (disy / halfy) % 2 != 0:
+                    fieldx = int((disx / halfx - 1) / 2)
+                    fieldy = int((disy / halfy - 1) / 2)
+                    attr = 0
+                    if success:
+                        attr = curses.A_NORMAL | curses.A_STANDOUT | curses.color_pair(3)
+                        stdscr.addstr(2, 1, 'Success')
+                    else:
+                        attr = curses.A_STANDOUT | curses.color_pair(7)
+                        stdscr.addstr(2, 1, 'You dead')
+
+                    mineWin.chgat(y, x, 1, attr)
+                    mineWin.chgat(y, x + 1, 1, attr)
+                    mineWin.chgat(y, x - 1, 1, attr)
+    mineWin.refresh()
+
+def shineMineField(mineWin, width, height): 
+    fieldWidth = (const.numhlines + 1) * width
+    fieldHeight = (const.numvlines + 1) * height
+    xend = fieldWidth
+    yend = fieldHeight 
+    halfx = (const.numhlines + 1) / 2
+    halfy = (const.numvlines + 1) / 2
+    while True:
+        mineWin.clear()
+        for x in range (0, xend):
+            for y in range (0, yend):
+                disx = x
+                disy = y
+                if (disx % halfx == 0) and (disx / halfx) % 2 != 0:
+                    if (disy % halfy == 0) and (disy / halfy) % 2 != 0:
+                        fieldx = int((disx / halfx - 1) / 2)
+                        fieldy = int((disy / halfy - 1) / 2)
+                        attr = curses.A_STANDOUT | curses.color_pair(3)
+                        mineWin.chgat(y, x, 1, attr)
+                        mineWin.chgat(y, x + 1, 1, attr)
+                        mineWin.chgat(y, x - 1, 1, attr)
+        time.sleep(0.05)
+        mineWin.refresh()
 
 wrapper(Main)

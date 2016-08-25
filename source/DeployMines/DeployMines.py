@@ -37,7 +37,11 @@ class DeployMines:
         upNum = (int)(upWidth * upHeight * numDivisor)
         rightNum = (int)(rightWidth * rightHeight * numDivisor)
         downNum = (int)(downWidth * downHeight * numDivisor)
-        leftNum = self.num - upNum - rightNum - downNum
+        leftNum = 0
+        if leftWidth * leftHeight == 0:
+            rightNum = rightNum + self.num - upNum - rightNum - downNum
+        else:
+            leftNum = self.num - upNum - rightNum - downNum
 
         xy = [m for m in range(upWidth * upHeight)]
         minexy = random.sample(xy, upNum)
@@ -47,7 +51,7 @@ class DeployMines:
         xy = [m for m in range(rightWidth * rightHeight)]
         minexy = random.sample(xy, rightNum)
         for i in range(len(minexy)) :
-            self.deploy((int)(minexy[i] / rightWidth) + upHeight, (int)(minexy[i] % rightWidth) + leftWidth + 3)
+            self.deploy((int)(minexy[i] / rightWidth) + upHeight, (int)(minexy[i] % rightWidth) + self.startx + 2)
 
         xy = [m for m in range(downWidth * downHeight)]
         minexy = random.sample(xy, downNum)

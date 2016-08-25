@@ -57,6 +57,8 @@ class MineShell:
             return False
         for y in range(self.field.height):
             for x in range(self.field.width):
+                if self.field.opened[y][x] == False and self.field.flagged[y][x] == False:
+                    return False
                 if self.field.status[y][x] == -1 and self.field.flagged[y][x] == False:
                     return False
                 if self.field.status[y][x] != -1 and self.field.flagged[y][x] == True:
