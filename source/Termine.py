@@ -114,10 +114,10 @@ def flagMineField(y, x, shell, mineWin):
         return True 
     wx = fieldx * unitx + const.numhlines - 1
     wy = fieldy * unity + const.numvlines
-    attr = curses.A_BOLD | curses.color_pair(7) 
+    attr = curses.A_BOLD | curses.color_pair(7) | curses.A_REVERSE
     mineWin.addstr(wy, wx, '$', attr)
-    mineWin.addch(wy, wx - 1, ord(' '))
-    mineWin.addch(wy, wx + 1, ord(' '))
+    mineWin.addch(wy, wx - 1, ord(' '), attr)
+    mineWin.addch(wy, wx + 1, ord(' '), attr)
     mineWin.refresh()
     return False 
 def peekMineField(y, x, shell, mineWin):
