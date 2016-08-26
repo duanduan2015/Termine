@@ -175,7 +175,8 @@ def pokeMineField(stdscr, y, x, shell, mineWin):
                     number = 5 
             attr = 0
             if number == 0:
-                attr = curses.A_BOLD | curses.color_pair(number + 1) | curses.A_DIM
+                #attr = curses.A_BOLD | curses.color_pair(number + 1) | curses.A_DIM
+                nums[i] = ' '
             else:
                 attr = curses.A_BOLD | curses.color_pair(number + 1) 
             mineWin.addch(openedy[i], openedx[i], ord(nums[i]), attr) 
