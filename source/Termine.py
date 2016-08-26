@@ -25,6 +25,8 @@ def Main(stdscr):
         queryGameStatus(shell, stdscr)
         event = stdscr.getch()
         if event == ord("q"): break 
+        if event == ord("r"):
+            shell = restartNewGame(mine, mineFieldWidth, mineFieldHeight, numMines)
         if event == curses.KEY_MOUSE:
             _, mx, my, _, bstate = curses.getmouse()
             if bstate & curses.BUTTON1_PRESSED :
@@ -35,16 +37,20 @@ def Main(stdscr):
                     unflagMineField(my, mx, shell, mine)
         if checkSuccess(shell):
             displayGameOver(shell, stdscr, mine, mineFieldWidth, mineFieldHeight, True)
-            continue
 
-def helpInfo():
-    print('If you want to play standard mode, please enter:')
-    print('python3 Termine.py easy/medium/hard')
-    print('If you want to play your own customized mode, pleas enter:')
-    print('python3 Termine.py customized <width> <height> <numOfMines>')
-    
+        elif checkFailure(shell):
+            displayGameOver(shell, stdscr, mine, mineFieldWidth, mineFieldHeight, False)
+        else:
+            stdscr.addstr(2, 1, '        ')
+            
+            
 
-
+def restartNewGame(mine, mineFieldWidth, mineFieldHeight, numMines):
+    shell = MineShell()
+    createField = 'minefield ' + str(mineFieldWidth) + ' ' + str(mineFieldHeight) + ' ' + str(numMines)
+    out = shell.getInput(createField)
+    drawUndeployedMineField(mine, mineFieldWidth, mineFieldHeight)
+    return shell
 
 
 def parseArgs(args):
@@ -63,10 +69,13 @@ def parseArgs(args):
 def checkSuccess(shell):
     return shell.getInput('query success')
 
+def checkFailure(shell):
+    return shell.getInput('query failure')
+
 def queryGameStatus(shell, stdscr):
     flags = shell.getInput('query flags')
     mines = shell.getInput('query mines')
-    stdscr.addstr(3, 1, str(flags) + '/' + str(mines))
+    stdscr.addstr(3, 1, str(flags) + '/' + mines + ' ')
 
         
 def unflagMineField(y, x, shell, mineWin):
@@ -89,6 +98,7 @@ def unflagMineField(y, x, shell, mineWin):
     mineWin.addch(wy, wx + 1, ord(' '), curses.A_REVERSE)
     mineWin.refresh()
 
+
 def flagMineField(y, x, shell, mineWin):
     starty, startx = mineWin.getbegyx()
     unitx = const.numhlines + 1
@@ -110,7 +120,6 @@ def flagMineField(y, x, shell, mineWin):
     mineWin.addch(wy, wx + 1, ord(' '))
     mineWin.refresh()
     return False 
-
 def peekMineField(y, x, shell, mineWin):
     starty, startx = mineWin.getbegyx()
     unitx = const.numhlines + 1
@@ -296,10 +305,11 @@ def displayGameOver(shell, stdscr, mineWin, width, height, success):
                 if (disy % halfy == 0) and (disy / halfy) % 2 != 0:
                     fieldx = int((disx / halfx - 1) / 2)
                     fieldy = int((disy / halfy - 1) / 2)
-
                     attr = 0
-
                     if success:
+                        if shell.field.status[fieldy][fieldx] == -1 and shell.field.opened[fieldy][fieldx] == False:
+                            starty, startx = mineWin.getbegyx()
+                            flagMineField(y + starty, x + startx, shell, mineWin)
                         attr = curses.A_NORMAL | curses.A_STANDOUT | curses.color_pair(3)
                         stdscr.addstr(2, 1, 'Success')
                     else:
@@ -342,5 +352,11 @@ def shineMineField(mineWin, width, height):
                         mineWin.chgat(y, x - 1, 1, attr)
         time.sleep(0.05)
         mineWin.refresh()
+
+def helpInfo():
+    print('If you want to play standard mode, please enter:')
+    print('python3 Termine.py easy/medium/hard')
+    print('If you want to play your own customized mode, pleas enter:')
+    print('python3 Termine.py customized <width> <height> <numOfMines>')
 
 wrapper(Main)

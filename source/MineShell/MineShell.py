@@ -51,10 +51,10 @@ class MineShell:
                 return str(self.field.height)
             if strings[1] == 'success':
                 return self.isSuccess()
+            if strings[1] == 'failure':
+                return self.isFailure()
 
     def isSuccess(self):
-        #if self.flagNum != self.mineNum:
-        #    return False
         for y in range(self.field.height):
             for x in range(self.field.width):
                 if self.field.status[y][x] != -1 and self.field.opened[y][x] == False:
@@ -62,6 +62,13 @@ class MineShell:
                 if self.field.opened[y][x] == True and self.field.status[y][x] == -1:
                     return False
         return True
+
+    def isFailure(self):
+        for y in range(self.field.height):
+            for x in range(self.field.width):
+                if self.field.status[y][x] == -1 and self.field.opened[y][x] == True:
+                    return True 
+        return False 
 
     def flag(self, x, y):
         if self.field.opened[y][x] == False and self.field.flagged[y][x] ==  False:
