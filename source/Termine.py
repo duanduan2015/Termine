@@ -310,8 +310,6 @@ def displayGameOver(shell, stdscr, mineWin, width, height, success):
                             else:
                                 num = str(num)
                             mineWin.addstr(y, x, num) 
-                            mineWin.addch(y, x - 1, ord(' '))
-                            mineWin.addch(y, x + 1, ord(' '))
                         shell.field.opened[fieldy][fieldx] = True
                         attr = curses.A_STANDOUT | curses.color_pair(7)
                         stdscr.addstr(2, 1, 'You dead')
