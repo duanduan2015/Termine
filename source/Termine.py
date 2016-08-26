@@ -59,7 +59,7 @@ def parseArgs(args):
     if args[1] == 'medium':
         return (16, 16, 40, 'medium')
     if args[1] == 'hard':
-        return (32, 16, 99, 'hard')
+        return (30, 16, 99, 'hard')
     if args[1] == 'customized':
         width = int(args[2])
         height = int(args[3])
