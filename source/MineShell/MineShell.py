@@ -59,18 +59,13 @@ class MineShell:
             for x in range(self.field.width):
                 if self.field.status[y][x] != -1 and self.field.opened[y][x] == False:
                     return False
-                #if self.field.opened[y][x] == False and self.field.flagged[y][x] == False:
-                #    return False
-                #if self.field.status[y][x] == -1 and self.field.flagged[y][x] == False:
-                #    return False
-                #if self.field.status[y][x] != -1 and self.field.flagged[y][x] == True:
-                #    return False
+                if self.field.opened[y][x] == True and self.field.status[y][x] == -1:
+                    return False
         return True
 
     def flag(self, x, y):
         if self.field.opened[y][x] == False and self.field.flagged[y][x] ==  False:
             self.field.flagged[y][x] = True
-            self.field.opened[y][x] = True
             self.flagNum = self.flagNum + 1
             return str(x) + self.space + str(y) + self.space + 'flagged'
         else:

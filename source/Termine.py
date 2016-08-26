@@ -34,7 +34,7 @@ def Main(stdscr):
                 if alreadyFlagged:
                     unflagMineField(my, mx, shell, mine)
         if checkSuccess(shell):
-            displayGameOver(stdscr, mine, mineFieldWidth, mineFieldHeight, True)
+            displayGameOver(shell, stdscr, mine, mineFieldWidth, mineFieldHeight, True)
             continue
 
 def helpInfo():
@@ -158,7 +158,7 @@ def pokeMineField(stdscr, y, x, shell, mineWin):
         for i in range(len(nums)):
             if len(nums[i]) > 1:
                 mineWin.addstr(openedy[i], openedx[i], ':(' ) 
-                displayGameOver(stdscr, mineWin, shell.field.width, shell.field.height, False)
+                displayGameOver(shell, stdscr, mineWin, shell.field.width, shell.field.height, False)
                 return 
             else:
                 number = int(nums[i])
@@ -279,7 +279,9 @@ def drawWindowLayout(stdscr, fwidth, fheight):
     panelWin.refresh()
     return (mineWin, logWin, panelWin)
 
-def displayGameOver(stdscr, mineWin, width, height, success):
+
+
+def displayGameOver(shell, stdscr, mineWin, width, height, success):
     fieldWidth = (const.numhlines + 1) * width
     fieldHeight = (const.numvlines + 1) * height
     xend = fieldWidth
@@ -294,11 +296,23 @@ def displayGameOver(stdscr, mineWin, width, height, success):
                 if (disy % halfy == 0) and (disy / halfy) % 2 != 0:
                     fieldx = int((disx / halfx - 1) / 2)
                     fieldy = int((disy / halfy - 1) / 2)
+
                     attr = 0
+
                     if success:
                         attr = curses.A_NORMAL | curses.A_STANDOUT | curses.color_pair(3)
                         stdscr.addstr(2, 1, 'Success')
                     else:
+                        if shell.field.flagged[fieldy][fieldx] == False and shell.field.opened[fieldy][fieldx] == False:
+                            num = shell.field.status[fieldy][fieldx]
+                            if num < 0:
+                                num = ':('
+                            else:
+                                num = str(num)
+                            mineWin.addstr(y, x, num) 
+                            mineWin.addch(y, x - 1, ord(' '))
+                            mineWin.addch(y, x + 1, ord(' '))
+                        shell.field.opened[fieldy][fieldx] = True
                         attr = curses.A_STANDOUT | curses.color_pair(7)
                         stdscr.addstr(2, 1, 'You dead')
 
