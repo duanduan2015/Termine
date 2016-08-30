@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import time
 import curses
-import const
+import Consts
 import sys
 from curses import wrapper
 from MineShell.MineShell import MineShell
@@ -80,8 +80,8 @@ def queryGameStatus(shell, stdscr):
         
 def unflagMineField(y, x, shell, mineWin):
     starty, startx = mineWin.getbegyx()
-    unitx = const.numhlines + 1
-    unity = const.numvlines + 1
+    unitx = Consts.numhlines + 1
+    unity = Consts.numvlines + 1
     y, x = y - starty, x - startx
     if x % (unitx)  == 0 or y % (unity) == 0:
         return
@@ -91,8 +91,8 @@ def unflagMineField(y, x, shell, mineWin):
     out = shell.getInput(flag)
     if out == None:
         return
-    wx = fieldx * unitx + const.numhlines - 1
-    wy = fieldy * unity + const.numvlines
+    wx = fieldx * unitx + Consts.numhlines - 1
+    wy = fieldy * unity + Consts.numvlines
     mineWin.addch(wy, wx, ord(' '), curses.A_REVERSE)
     mineWin.addch(wy, wx - 1, ord(' '), curses.A_REVERSE)
     mineWin.addch(wy, wx + 1, ord(' '), curses.A_REVERSE)
@@ -101,8 +101,8 @@ def unflagMineField(y, x, shell, mineWin):
 
 def flagMineField(y, x, shell, mineWin):
     starty, startx = mineWin.getbegyx()
-    unitx = const.numhlines + 1
-    unity = const.numvlines + 1
+    unitx = Consts.numhlines + 1
+    unity = Consts.numvlines + 1
     y, x = y - starty, x - startx
     if x % (unitx)  == 0 or y % (unity) == 0:
         return
@@ -112,8 +112,8 @@ def flagMineField(y, x, shell, mineWin):
     out = shell.getInput(flag)
     if out == None:
         return True 
-    wx = fieldx * unitx + const.numhlines - 1
-    wy = fieldy * unity + const.numvlines
+    wx = fieldx * unitx + Consts.numhlines - 1
+    wy = fieldy * unity + Consts.numvlines
     attr = curses.A_BOLD | curses.color_pair(7) | curses.A_REVERSE
     mineWin.addstr(wy, wx, '$', attr)
     mineWin.addch(wy, wx - 1, ord(' '), attr)
@@ -122,8 +122,8 @@ def flagMineField(y, x, shell, mineWin):
     return False 
 def peekMineField(y, x, shell, mineWin):
     starty, startx = mineWin.getbegyx()
-    unitx = const.numhlines + 1
-    unity = const.numvlines + 1
+    unitx = Consts.numhlines + 1
+    unity = Consts.numvlines + 1
     y, x = y - starty, x - startx
     if x % (unitx)  == 0 or y % (unity) == 0:
         return
@@ -131,8 +131,8 @@ def peekMineField(y, x, shell, mineWin):
     fieldy = (int)(y / unity)
     peek = 'peek' + ' ' + str(fieldx) + ' ' + str(fieldy)
     num = shell.getInput(peek)
-    wx = fieldx * unitx + const.numhlines - 1
-    wy = fieldy * unity + const.numvlines
+    wx = fieldx * unitx + Consts.numhlines - 1
+    wy = fieldy * unity + Consts.numvlines
     mineWin.addstr(wy, wx, num)
     mineWin.addch(wy, wx - 1, ord(' '))
     mineWin.addch(wy, wx + 1, ord(' '))
@@ -142,8 +142,8 @@ def peekMineField(y, x, shell, mineWin):
 def pokeMineField(stdscr, y, x, shell, mineWin):
     starty, startx = mineWin.getbegyx()
     y, x = y - starty, x - startx
-    unitx = const.numhlines + 1
-    unity = const.numvlines + 1
+    unitx = Consts.numhlines + 1
+    unity = Consts.numvlines + 1
     if x % (unitx)  == 0 or y % (unity) == 0:
         return
     fieldx = (int)(x / unitx)
@@ -158,8 +158,8 @@ def pokeMineField(stdscr, y, x, shell, mineWin):
             string = out.split(' ')
             minex = int(string[0])
             miney = int(string[1])
-            wx = minex * unitx + const.numhlines - 1
-            wy = miney * unity + const.numvlines
+            wx = minex * unitx + Consts.numhlines - 1
+            wy = miney * unity + Consts.numvlines
             openedx.append(int(wx))
             openedy.append(int(wy))
             nums.append(string[4])
@@ -202,37 +202,37 @@ def setCursesFeatures():
 
 def drawUndeployedMineField(mineWin, width, height):
     windowHeight, windowWidth = mineWin.getmaxyx()
-    fieldWidth = (const.numhlines + 1) * width
-    fieldHeight = (const.numvlines + 1) * height
+    fieldWidth = (Consts.numhlines + 1) * width
+    fieldHeight = (Consts.numvlines + 1) * height
     starty, startx = 0, 0
     xindex, yindex = startx, starty
     xend = xindex + fieldWidth
     yend = yindex + fieldHeight 
     attr = curses.A_BOLD | curses.color_pair(1)
     mineWin.addch(starty, startx, curses.ACS_ULCORNER, attr)
-    mineWin.addch(starty + (const.numvlines + 1) * height, startx, curses.ACS_LLCORNER, attr)
-    mineWin.addch(starty, startx + (const.numhlines + 1) * width, curses.ACS_URCORNER, attr)
-    mineWin.addch(starty + (const.numvlines + 1) * height, startx + (const.numhlines + 1) * width, curses.ACS_LRCORNER, attr)
+    mineWin.addch(starty + (Consts.numvlines + 1) * height, startx, curses.ACS_LLCORNER, attr)
+    mineWin.addch(starty, startx + (Consts.numhlines + 1) * width, curses.ACS_URCORNER, attr)
+    mineWin.addch(starty + (Consts.numvlines + 1) * height, startx + (Consts.numhlines + 1) * width, curses.ACS_LRCORNER, attr)
     for x in range(xindex + 1, xend):
-        if (x - startx) % (const.numhlines + 1) == 0:
+        if (x - startx) % (Consts.numhlines + 1) == 0:
             mineWin.addch(yindex, x, curses.ACS_TTEE, attr)
             for y in range(yindex + 1, yend):
-                if (y - starty) % (const.numvlines + 1) != 0:
+                if (y - starty) % (Consts.numvlines + 1) != 0:
                     mineWin.addch(y, x, curses.ACS_VLINE, attr)
         else:
             mineWin.addch(yindex, x, curses.ACS_HLINE, attr)
 
     for x in range(xindex + 1, xend):
-        if (x - startx) % (const.numhlines + 1) == 0:
+        if (x - startx) % (Consts.numhlines + 1) == 0:
             mineWin.addch(yend, x, curses.ACS_BTEE, attr)
         else:
             mineWin.addch(yend, x, curses.ACS_HLINE, attr)
 
     for y in range(yindex + 1, yend):
-        if (y - starty) % (const.numvlines + 1) == 0:
+        if (y - starty) % (Consts.numvlines + 1) == 0:
             mineWin.addch(y, startx, curses.ACS_LTEE, attr)
             for x in range(xindex + 1, xend):
-                if (x - startx) % (const.numhlines + 1) == 0:
+                if (x - startx) % (Consts.numhlines + 1) == 0:
                     mineWin.addch(y, x, curses.ACS_PLUS, attr)
                 else:
                     mineWin.addch(y, x, curses.ACS_HLINE, attr)
@@ -240,13 +240,13 @@ def drawUndeployedMineField(mineWin, width, height):
             mineWin.addch(y, startx, curses.ACS_VLINE, attr)
 
     for y in range(yindex + 1, yend):
-        if (y - starty) % (const.numvlines + 1) == 0:
+        if (y - starty) % (Consts.numvlines + 1) == 0:
             mineWin.addch(y, xend, curses.ACS_RTEE, attr)
         else:
             mineWin.addch(y, xend, curses.ACS_VLINE, attr)
 
-    halfx = (const.numhlines + 1) / 2
-    halfy = (const.numvlines + 1) / 2
+    halfx = (Consts.numhlines + 1) / 2
+    halfy = (Consts.numvlines + 1) / 2
 
     for x in range (startx, xend):
         for y in range (starty, yend):
@@ -272,8 +272,8 @@ def drawWindowLayout(stdscr, fwidth, fheight):
     mineColumns = width - logColumns - paddingMineLog
     paddingTop = 3
     windowHeight, windowWidth = mineLines, mineColumns
-    fieldWidth = (const.numhlines + 1) * (fwidth + 1)
-    fieldHeight = (const.numvlines + 1) * (fheight + 1)
+    fieldWidth = (Consts.numhlines + 1) * (fwidth + 1)
+    fieldHeight = (Consts.numvlines + 1) * (fheight + 1)
     starty = (int)((windowHeight - fieldHeight) / 2) 
     startx = (int)((windowWidth - fieldWidth) / 2)
     mineWin = curses.newwin(fieldHeight, fieldWidth, starty + paddingTop, startx)
@@ -292,12 +292,12 @@ def drawWindowLayout(stdscr, fwidth, fheight):
 
 
 def displayGameOver(shell, stdscr, mineWin, width, height, success):
-    fieldWidth = (const.numhlines + 1) * width
-    fieldHeight = (const.numvlines + 1) * height
+    fieldWidth = (Consts.numhlines + 1) * width
+    fieldHeight = (Consts.numvlines + 1) * height
     xend = fieldWidth
     yend = fieldHeight 
-    halfx = (const.numhlines + 1) / 2
-    halfy = (const.numvlines + 1) / 2
+    halfx = (Consts.numhlines + 1) / 2
+    halfy = (Consts.numvlines + 1) / 2
     for x in range (0, xend):
         for y in range (0, yend):
             disx = x
@@ -331,12 +331,12 @@ def displayGameOver(shell, stdscr, mineWin, width, height, success):
     mineWin.refresh()
 
 def shineMineField(mineWin, width, height): 
-    fieldWidth = (const.numhlines + 1) * width
-    fieldHeight = (const.numvlines + 1) * height
+    fieldWidth = (Consts.numhlines + 1) * width
+    fieldHeight = (Consts.numvlines + 1) * height
     xend = fieldWidth
     yend = fieldHeight 
-    halfx = (const.numhlines + 1) / 2
-    halfy = (const.numvlines + 1) / 2
+    halfx = (Consts.numhlines + 1) / 2
+    halfy = (Consts.numvlines + 1) / 2
     while True:
         mineWin.clear()
         for x in range (0, xend):
