@@ -23,13 +23,33 @@ def Main(stdscr):
     drawUndeployedMineField(mine, mineFieldWidth, mineFieldHeight)
     start_time = 0
     end_time = 0
+    start_pause = 0
+    end_pause = 0
+    pause_total_time = 0
     while True:
         queryGameStatus(shell, stdscr)
         event = stdscr.getch()
         if event == ord("q"): break 
+        if event == ord("u"):
+            if start_pause != 0:
+                end_pause = time.time()
+                unPauseGame(shell, mine, mineFieldWidth, mineFieldHeight)
+                pause_total_time = end_pause - start_pause
+                start_pause = 0
+                end_pause = 0
+        if event == ord("p"):
+            if start_time == 0 or end_time != 0 or start_pause != 0:
+                continue
+            else:
+                start_pause = time.time()
+                pauseGame(mine, mineFieldWidth, mineFieldHeight)
         if event == ord("r"):
             shell = restartNewGame(mine, mineFieldWidth, mineFieldHeight, numMines)
             start_time = 0
+            end_time = 0
+            start_pause = 0
+            end_pause = 0
+            pause_total_time = 0 
         if event == curses.KEY_MOUSE:
             _, mx, my, _, bstate = curses.getmouse()
             if bstate & curses.BUTTON1_PRESSED :
@@ -42,7 +62,7 @@ def Main(stdscr):
                     unflagMineField(my, mx, shell, mine)
         if checkSuccess(shell):
             end_time = displayGameOver(shell, stdscr, mine, mineFieldWidth, mineFieldHeight, True)
-            stdscr.addstr(4, 1, str(end_time - start_time) + ' ' + 'seconds')
+            stdscr.addstr(4, 1, str(end_time - start_time - pause_total_time) + ' ' + 'seconds')
 
         elif checkFailure(shell):
             end_time = displayGameOver(shell, stdscr, mine, mineFieldWidth, mineFieldHeight, False)
@@ -50,6 +70,12 @@ def Main(stdscr):
             stdscr.addstr(2, 1, '        ')
             
             
+def pauseGame(mineWin, width, height):
+    drawUndeployedMineField(mineWin, width, height)
+
+def unPauseGame(shell, minWin, width, height):
+    drawPokedMineField(shell, minWin, width, height)
+
 
 def restartNewGame(mine, mineFieldWidth, mineFieldHeight, numMines):
     shell = MineShell()
@@ -205,6 +231,43 @@ def setCursesFeatures():
     curses.mousemask(-1)
     curses.mouseinterval(0)
     curses.curs_set(0)
+
+def drawPokedMineField(shell, mineWin, width, height):
+    windowHeight, windowWidth = mineWin.getmaxyx()
+    fieldWidth = (Consts.numhlines + 1) * width
+    fieldHeight = (Consts.numvlines + 1) * height
+    starty, startx = 0, 0
+    xindex, yindex = startx, starty
+    xend = xindex + fieldWidth
+    yend = yindex + fieldHeight 
+
+    halfx = (Consts.numhlines + 1) / 2
+    halfy = (Consts.numvlines + 1) / 2
+
+    for x in range (startx, xend):
+        for y in range (starty, yend):
+            disx = x - startx
+            disy = y - starty
+            if (disx % halfx == 0) and (disx / halfx) % 2 != 0:
+                if (disy % halfy == 0) and (disy / halfy) % 2 != 0:
+                    fieldx = int((disx / halfx - 1) / 2)
+                    fieldy = int((disy / halfy - 1) / 2)
+                    if shell.field.opened[fieldy][fieldx] == True:
+                        number = shell.field.status[fieldy][fieldx]
+                        attr = curses.A_BOLD | curses.color_pair(number + 1) 
+                        if number == 0:
+                            number = ' '
+                        else:
+                            number = str(number)
+                        mineWin.addstr(y, x, number, attr) 
+                        mineWin.addch(y, x - 1, ord(' '), attr)
+                        mineWin.addch(y, x + 1, ord(' '), attr)
+                    elif shell.field.flagged[fieldy][fieldx] == True:
+                        attr = curses.A_BOLD | curses.color_pair(7) | curses.A_REVERSE
+                        mineWin.addstr(y, x, '$', attr)
+                        mineWin.addch(y, x - 1, ord(' '), attr)
+                        mineWin.addch(y, x + 1, ord(' '), attr)
+    mineWin.refresh()
 
 def drawUndeployedMineField(mineWin, width, height):
     windowHeight, windowWidth = mineWin.getmaxyx()
