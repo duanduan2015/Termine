@@ -21,25 +21,31 @@ def Main(stdscr):
     stdscr.refresh()
     mine, log, panel = drawWindowLayout(stdscr, mineFieldWidth, mineFieldHeight)
     drawUndeployedMineField(mine, mineFieldWidth, mineFieldHeight)
+    start_time = 0
+    end_time = 0
     while True:
         queryGameStatus(shell, stdscr)
         event = stdscr.getch()
         if event == ord("q"): break 
         if event == ord("r"):
             shell = restartNewGame(mine, mineFieldWidth, mineFieldHeight, numMines)
+            start_time = 0
         if event == curses.KEY_MOUSE:
             _, mx, my, _, bstate = curses.getmouse()
             if bstate & curses.BUTTON1_PRESSED :
+                if start_time == 0:
+                    start_time = time.time()
                 pokeMineField(stdscr, my, mx, shell, mine)
             elif bstate & curses.BUTTON3_PRESSED:
                 alreadyFlagged = flagMineField(my, mx, shell, mine)
                 if alreadyFlagged:
                     unflagMineField(my, mx, shell, mine)
         if checkSuccess(shell):
-            displayGameOver(shell, stdscr, mine, mineFieldWidth, mineFieldHeight, True)
+            end_time = displayGameOver(shell, stdscr, mine, mineFieldWidth, mineFieldHeight, True)
+            stdscr.addstr(4, 1, str(end_time - start_time) + ' ' + 'seconds')
 
         elif checkFailure(shell):
-            displayGameOver(shell, stdscr, mine, mineFieldWidth, mineFieldHeight, False)
+            end_time = displayGameOver(shell, stdscr, mine, mineFieldWidth, mineFieldHeight, False)
         else:
             stdscr.addstr(2, 1, '        ')
             
@@ -292,6 +298,7 @@ def drawWindowLayout(stdscr, fwidth, fheight):
 
 
 def displayGameOver(shell, stdscr, mineWin, width, height, success):
+    end_time = time.time()
     fieldWidth = (Consts.numhlines + 1) * width
     fieldHeight = (Consts.numvlines + 1) * height
     xend = fieldWidth
@@ -329,6 +336,7 @@ def displayGameOver(shell, stdscr, mineWin, width, height, success):
                     mineWin.chgat(y, x + 1, 1, attr)
                     mineWin.chgat(y, x - 1, 1, attr)
     mineWin.refresh()
+    return end_time
 
 def shineMineField(mineWin, width, height): 
     fieldWidth = (Consts.numhlines + 1) * width
