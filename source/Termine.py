@@ -3,6 +3,7 @@ import time
 import curses
 import Consts
 import sys
+import os.path
 from curses import wrapper
 from MineShell.MineShell import MineShell
 
@@ -19,31 +20,36 @@ def Main(stdscr):
     out = shell.getInput(createField)
     stdscr.addstr(1, 1, out)
     stdscr.refresh()
-    mine, log, panel = drawWindowLayout(stdscr, mineFieldWidth, mineFieldHeight)
+    mine, log, panel, record = drawWindowLayout(stdscr, mineFieldWidth, mineFieldHeight)
     drawUndeployedMineField(mine, mineFieldWidth, mineFieldHeight)
     start_time = 0
     end_time = 0
     start_pause = 0
     end_pause = 0
     pause_total_time = 0
+    fileName = str(mineFieldWidth) + 'X' + str(mineFieldHeight) + 'with' + str(numMines) + 'mines'
     while True:
         queryGameStatus(shell, stdscr)
         event = stdscr.getch()
         if event == ord("q"): break 
-        if event == ord("u"):
+        if event == ord("R"):   #display Records
+            if start_pause == 0:
+                start_pause = pauseGame(mine, mineFieldWidth, mineFieldHeight)
+            displayRecords(record, fileName)
+        if event == ord("c"):   #continue game
+            record.erase()
+            record.refresh()
             if start_pause != 0:
-                end_pause = time.time()
-                unPauseGame(shell, mine, mineFieldWidth, mineFieldHeight)
+                end_pause = continueGame(shell, mine, mineFieldWidth, mineFieldHeight)
                 pause_total_time = end_pause - start_pause
                 start_pause = 0
                 end_pause = 0
-        if event == ord("p"):
+        if event == ord("p"):   #pause game
             if start_time == 0 or end_time != 0 or start_pause != 0:
                 continue
             else:
-                start_pause = time.time()
-                pauseGame(mine, mineFieldWidth, mineFieldHeight)
-        if event == ord("r"):
+                start_pause = pauseGame(mine, mineFieldWidth, mineFieldHeight)
+        if event == ord("r"):   #restart game
             shell = restartNewGame(mine, mineFieldWidth, mineFieldHeight, numMines)
             start_time = 0
             end_time = 0
@@ -63,6 +69,7 @@ def Main(stdscr):
         if checkSuccess(shell):
             end_time = displayGameOver(shell, stdscr, mine, mineFieldWidth, mineFieldHeight, True)
             stdscr.addstr(4, 1, str(end_time - start_time - pause_total_time) + ' ' + 'seconds')
+            displayRecords(record, fileName)
 
         elif checkFailure(shell):
             end_time = displayGameOver(shell, stdscr, mine, mineFieldWidth, mineFieldHeight, False)
@@ -70,11 +77,29 @@ def Main(stdscr):
             stdscr.addstr(2, 1, '        ')
             
             
-def pauseGame(mineWin, width, height):
-    drawUndeployedMineField(mineWin, width, height)
 
-def unPauseGame(shell, minWin, width, height):
-    drawPokedMineField(shell, minWin, width, height)
+def displayRecords(record, fileName):
+    fileIsExist = os.path.isfile(fileName)
+    if fileIsExist:
+        recordsFile = open(fileName, "r")
+    else:
+        recordsFile = open(fileName, "w")
+        recordsFile.close()
+        recordsFile = open(fileName, "r")
+    record.border()
+    record.refresh()
+    return
+
+def pauseGame(mineWin, width, height):
+    pauseBeginTime = time.time()
+    drawUndeployedMineField(mineWin, width, height)
+    return pauseBeginTime
+
+def continueGame(shell, mineWin, width, height):
+    pauseEndTime = time.time()
+    drawUndeployedMineField(mineWin, width, height)
+    drawPokedMineField(shell, mineWin, width, height)
+    return pauseEndTime
 
 
 def restartNewGame(mine, mineFieldWidth, mineFieldHeight, numMines):
@@ -345,6 +370,11 @@ def drawWindowLayout(stdscr, fwidth, fheight):
     fieldHeight = (Consts.numvlines + 1) * (fheight + 1)
     starty = (int)((windowHeight - fieldHeight) / 2) 
     startx = (int)((windowWidth - fieldWidth) / 2)
+    recordWidth = 30
+    recordHeight = 16 
+    recordBeginx = startx + fieldWidth // 2 - recordWidth // 2 - 1
+    recordBeginy = starty + paddingTop + fieldHeight // 2 - recordHeight // 2 - 1
+    recordWin = curses.newwin(recordHeight, recordWidth, recordBeginy, recordBeginx) 
     mineWin = curses.newwin(fieldHeight, fieldWidth, starty + paddingTop, startx)
     logLines = mineLines
     logWin = curses.newwin(logLines, logColumns, 3, mineColumns + paddingMineLog)
@@ -356,7 +386,7 @@ def drawWindowLayout(stdscr, fwidth, fheight):
     panelWin = curses.newwin(panelLines, panelColumns, height - panelLines, 0)
     panelWin.border()
     panelWin.refresh()
-    return (mineWin, logWin, panelWin)
+    return (mineWin, logWin, panelWin, recordWin)
 
 
 
