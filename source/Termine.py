@@ -86,9 +86,17 @@ def displayRecords(record, fileName):
         recordsFile = open(fileName, "w")
         recordsFile.close()
         recordsFile = open(fileName, "r")
-    record.border()
-    record.refresh()
+    drawRecordWindow(record)
     return
+
+def drawRecordWindow(record):
+    attr = curses.A_BOLD | curses.color_pair(2)
+    height, width = record.getmaxyx()
+    star = ord('*') | attr
+    record.border(star, star, star, star, star, star, star, star)
+    record.addstr(1, 9, 'RECORDS', attr)
+    record.refresh()
+
 
 def pauseGame(mineWin, width, height):
     pauseBeginTime = time.time()
@@ -370,10 +378,10 @@ def drawWindowLayout(stdscr, fwidth, fheight):
     fieldHeight = (Consts.numvlines + 1) * (fheight + 1)
     starty = (int)((windowHeight - fieldHeight) / 2) 
     startx = (int)((windowWidth - fieldWidth) / 2)
-    recordWidth = 30
+    recordWidth = 25 
     recordHeight = 16 
-    recordBeginx = startx + fieldWidth // 2 - recordWidth // 2 - 1
-    recordBeginy = starty + paddingTop + fieldHeight // 2 - recordHeight // 2 - 1
+    recordBeginx = startx + fieldWidth // 2 - recordWidth // 2 - 2 
+    recordBeginy = starty + paddingTop + fieldHeight // 2 - recordHeight // 2 - 2 
     recordWin = curses.newwin(recordHeight, recordWidth, recordBeginy, recordBeginx) 
     mineWin = curses.newwin(fieldHeight, fieldWidth, starty + paddingTop, startx)
     logLines = mineLines
