@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import time
+from datetime import date
 import curses
 import Consts
 import sys
@@ -28,6 +29,7 @@ def Main(stdscr):
     end_pause = 0
     pause_total_time = 0
     fileName = str(mineFieldWidth) + 'X' + str(mineFieldHeight) + 'with' + str(numMines) + 'mines'
+    restart = True
     while True:
         queryGameStatus(shell, stdscr)
         event = stdscr.getch()
@@ -35,7 +37,9 @@ def Main(stdscr):
         if event == ord("R"):   #display Records
             if start_pause == 0:
                 start_pause = pauseGame(mine, mineFieldWidth, mineFieldHeight)
-            displayRecords(record, fileName)
+            displayRecords(record, fileName, 0)
+            continue
+
         if event == ord("c"):   #continue game
             record.erase()
             record.refresh()
@@ -44,18 +48,25 @@ def Main(stdscr):
                 pause_total_time = end_pause - start_pause
                 start_pause = 0
                 end_pause = 0
+            continue
+
         if event == ord("p"):   #pause game
             if start_time == 0 or end_time != 0 or start_pause != 0:
                 continue
             else:
                 start_pause = pauseGame(mine, mineFieldWidth, mineFieldHeight)
+            continue
         if event == ord("r"):   #restart game
+            restart = True
+            record.clear()
+            record.refresh()
             shell = restartNewGame(mine, mineFieldWidth, mineFieldHeight, numMines)
             start_time = 0
             end_time = 0
             start_pause = 0
             end_pause = 0
             pause_total_time = 0 
+            continue
         if event == curses.KEY_MOUSE:
             _, mx, my, _, bstate = curses.getmouse()
             if bstate & curses.BUTTON1_PRESSED :
@@ -66,19 +77,67 @@ def Main(stdscr):
                 alreadyFlagged = flagMineField(my, mx, shell, mine)
                 if alreadyFlagged:
                     unflagMineField(my, mx, shell, mine)
-        if checkSuccess(shell):
-            end_time = displayGameOver(shell, stdscr, mine, mineFieldWidth, mineFieldHeight, True)
-            stdscr.addstr(4, 1, str(end_time - start_time - pause_total_time) + ' ' + 'seconds')
-            displayRecords(record, fileName)
+            if restart == True:
+                if checkSuccess(shell):
+                    restart = False
+                    end_time = displayGameOver(shell, stdscr, mine, mineFieldWidth, mineFieldHeight, True)
+                    totalTime = end_time - start_time - pause_total_time
+                    stdscr.addstr(4, 1, str(totalTime) + ' ' + 'seconds')
+                    addNewRecord(fileName, totalTime)
+                    displayRecords(record, fileName, int(totalTime))
 
-        elif checkFailure(shell):
-            end_time = displayGameOver(shell, stdscr, mine, mineFieldWidth, mineFieldHeight, False)
-        else:
-            stdscr.addstr(2, 1, '        ')
+                elif checkFailure(shell):
+                    restart = False
+                    end_time = displayGameOver(shell, stdscr, mine, mineFieldWidth, mineFieldHeight, False)
+                else:
+                    stdscr.addstr(2, 1, '        ')
             
             
+def addNewRecord(fileName, totalTime):
+    fileIsExist = os.path.isfile(fileName)
+    if fileIsExist:
+        recordsFile = open(fileName, "r")
+    else:
+        recordsFile = open(fileName, "w")
+        recordsFile.close()
+        recordsFile = open(fileName, "r")
+    time = int(totalTime)
+    today = date.today().strftime("%d/%m/%y")
+    records = [] 
+    line = recordsFile.readline()
+    if line != '':
+        oldRecords = line.split('#')
+        for x in range(len(oldRecords) - 1):
+            records.append(oldRecords[x])
+        added = False
+        for x in range(len(records)):
+            r = records[x].split(' ')
+            t = int(r[1])
+            if t > time:
+                newLine = today + ' ' + str(time)
+                records.insert(x, newLine)
+                added = True
+                break
+        if not added:
+            newLine = today + ' ' + str(time)
+            records.append(newLine)
+    else:
+        newLine = today + ' ' + str(time)
+        records.append(newLine)
+    recordsFile.close()
+    recordsFile = open(fileName, 'w+')
+    newFile = '' 
+    num = 0
+    for line in records:
+        num = num + 1
+        newFile = newFile + line + ' ' + '#'
+        if num == 10:
+            break
 
-def displayRecords(record, fileName):
+    recordsFile.write(newFile)
+    recordsFile.close()
+
+def displayRecords(record, fileName, highLightTime):
     fileIsExist = os.path.isfile(fileName)
     if fileIsExist:
         recordsFile = open(fileName, "r")
@@ -87,6 +146,30 @@ def displayRecords(record, fileName):
         recordsFile.close()
         recordsFile = open(fileName, "r")
     drawRecordWindow(record)
+    starty = 4 
+    attr = curses.A_BOLD | curses.color_pair(2)
+    line = recordsFile.readline()
+    records = []
+    highLighted = False
+    if line != '':
+        records = line.split('#')
+        for r in records:
+            if r == '':
+                continue
+            strings = r.split(' ')
+            highLight = curses.A_BOLD | curses.color_pair(4)
+            if int(strings[1]) == highLightTime and highLighted == False:
+                highLighted = True
+                record.addstr(starty, 2, strings[0], highLight)
+                record.addstr(starty, 12, strings[1] + 's', highLight)
+            else:
+                record.addstr(starty, 2, strings[0], attr)
+                record.addstr(starty, 12, strings[1] + 's', attr)
+            starty = starty + 1
+    recordsFile.close()
+    star = ord('*') | attr
+    record.border(star, star, star, star, star, star, star, star)
+    record.refresh()
     return
 
 def drawRecordWindow(record):
@@ -95,7 +178,8 @@ def drawRecordWindow(record):
     star = ord('*') | attr
     record.border(star, star, star, star, star, star, star, star)
     record.addstr(1, 9, 'RECORDS', attr)
-    record.refresh()
+    record.addstr(2, 2, 'Date', attr)
+    record.addstr(2, 12, 'Time', attr)
 
 
 def pauseGame(mineWin, width, height):
