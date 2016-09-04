@@ -34,19 +34,32 @@ def Main(stdscr):
         event = stdscr.getch()
         if event == ord("q"): break 
         if event == ord("R"):   #display Records
-            if start_pause == 0:
+            success = checkSuccess(shell)
+            failure = checkFailure(shell)
+            if not success and not failure:
                 start_pause = pauseGame(mine, mineFieldWidth, mineFieldHeight)
-            displayRecords(record, fileName, 0)
+                displayRecords(record, fileName, 0)
+            else:
+                displayRecords(record, fileName, 0)
+                
             continue
 
         if event == ord("c"):   #continue game
             record.erase()
             record.refresh()
-            if start_pause != 0:
+            success = checkSuccess(shell)
+            failure = checkFailure(shell)
+            if not success and not failure:
                 end_pause = continueGame(shell, mine, mineFieldWidth, mineFieldHeight)
                 pause_total_time = end_pause - start_pause
                 start_pause = 0
                 end_pause = 0
+            else:
+                if success:
+                    displayGameOver(shell, stdscr, mine, mineFieldWidth, mineFieldHeight, True)
+                else:
+                    displayGameOver(shell, stdscr, mine, mineFieldWidth, mineFieldHeight, False)
+
             continue
 
         if event == ord("p"):   #pause game
@@ -310,7 +323,9 @@ def pokeMineField(stdscr, y, x, shell, mineWin):
             number = 0
         for i in range(len(nums)):
             if len(nums[i]) > 1:
-                mineWin.addstr(openedy[i], openedx[i], ':(' ) 
+                attr = curses.color_pair(7) | curses.A_STANDOUT
+                mineWin.addstr(openedy[i], openedx[i], ':(' , attr) 
+                mineWin.addch(openedy[i], openedx[i] - 1, ord(' '), attr)
                 displayGameOver(shell, stdscr, mineWin, shell.field.width, shell.field.height, False)
                 return 
             else:
@@ -380,7 +395,7 @@ def drawPokedMineField(shell, mineWin, width, height):
                         mineWin.addch(y, x + 1, ord(' '), attr)
     mineWin.refresh()
 
-def drawUndeployedMineField(mineWin, width, height):
+def drawMineFieldFrame(mineWin, width, height, color):
     windowHeight, windowWidth = mineWin.getmaxyx()
     fieldWidth = (Consts.numhlines + 1) * width
     fieldHeight = (Consts.numvlines + 1) * height
@@ -388,7 +403,7 @@ def drawUndeployedMineField(mineWin, width, height):
     xindex, yindex = startx, starty
     xend = xindex + fieldWidth
     yend = yindex + fieldHeight 
-    attr = curses.A_BOLD | curses.color_pair(1)
+    attr = curses.A_BOLD | color 
     mineWin.addch(starty, startx, curses.ACS_ULCORNER, attr)
     mineWin.addch(starty + (Consts.numvlines + 1) * height, startx, curses.ACS_LLCORNER, attr)
     mineWin.addch(starty, startx + (Consts.numhlines + 1) * width, curses.ACS_URCORNER, attr)
@@ -424,7 +439,61 @@ def drawUndeployedMineField(mineWin, width, height):
             mineWin.addch(y, xend, curses.ACS_RTEE, attr)
         else:
             mineWin.addch(y, xend, curses.ACS_VLINE, attr)
+    #mineWin.refresh()
 
+def drawUndeployedMineField(mineWin, width, height):
+    drawMineFieldFrame(mineWin, width, height, curses.color_pair(1))
+    #windowHeight, windowWidth = mineWin.getmaxyx()
+    #fieldWidth = (Consts.numhlines + 1) * width
+    #fieldHeight = (Consts.numvlines + 1) * height
+    #starty, startx = 0, 0
+    #xindex, yindex = startx, starty
+    #xend = xindex + fieldWidth
+    #yend = yindex + fieldHeight 
+    #attr = curses.A_BOLD | curses.color_pair(1)
+    #mineWin.addch(starty, startx, curses.ACS_ULCORNER, attr)
+    #mineWin.addch(starty + (Consts.numvlines + 1) * height, startx, curses.ACS_LLCORNER, attr)
+    #mineWin.addch(starty, startx + (Consts.numhlines + 1) * width, curses.ACS_URCORNER, attr)
+    #mineWin.addch(starty + (Consts.numvlines + 1) * height, startx + (Consts.numhlines + 1) * width, curses.ACS_LRCORNER, attr)
+    #for x in range(xindex + 1, xend):
+    #    if (x - startx) % (Consts.numhlines + 1) == 0:
+    #        mineWin.addch(yindex, x, curses.ACS_TTEE, attr)
+    #        for y in range(yindex + 1, yend):
+    #            if (y - starty) % (Consts.numvlines + 1) != 0:
+    #                mineWin.addch(y, x, curses.ACS_VLINE, attr)
+    #    else:
+    #        mineWin.addch(yindex, x, curses.ACS_HLINE, attr)
+
+    #for x in range(xindex + 1, xend):
+    #    if (x - startx) % (Consts.numhlines + 1) == 0:
+    #        mineWin.addch(yend, x, curses.ACS_BTEE, attr)
+    #    else:
+    #        mineWin.addch(yend, x, curses.ACS_HLINE, attr)
+
+    #for y in range(yindex + 1, yend):
+    #    if (y - starty) % (Consts.numvlines + 1) == 0:
+    #        mineWin.addch(y, startx, curses.ACS_LTEE, attr)
+    #        for x in range(xindex + 1, xend):
+    #            if (x - startx) % (Consts.numhlines + 1) == 0:
+    #                mineWin.addch(y, x, curses.ACS_PLUS, attr)
+    #            else:
+    #                mineWin.addch(y, x, curses.ACS_HLINE, attr)
+    #    else:
+    #        mineWin.addch(y, startx, curses.ACS_VLINE, attr)
+
+    #for y in range(yindex + 1, yend):
+    #    if (y - starty) % (Consts.numvlines + 1) == 0:
+    #        mineWin.addch(y, xend, curses.ACS_RTEE, attr)
+    #    else:
+    #        mineWin.addch(y, xend, curses.ACS_VLINE, attr)
+
+    windowHeight, windowWidth = mineWin.getmaxyx()
+    fieldWidth = (Consts.numhlines + 1) * width
+    fieldHeight = (Consts.numvlines + 1) * height
+    starty, startx = 0, 0
+    xindex, yindex = startx, starty
+    xend = xindex + fieldWidth
+    yend = yindex + fieldHeight 
     halfx = (Consts.numhlines + 1) / 2
     halfy = (Consts.numvlines + 1) / 2
 
@@ -462,7 +531,7 @@ def drawWindowLayout(stdscr, fwidth, fheight):
     mineWin = curses.newwin(fieldHeight, fieldWidth, starty + paddingTop, startx)
     logLines = height - 3 
     logWin = curses.newwin(logLines, logColumns, 0, mineColumns + paddingMineLog)
-    drawBorder(logWin, curses.color_pair(3))
+    drawBorder(logWin, curses.color_pair(6))
     logWin.refresh()
     paddingMinePanel = 2
     panelLines = 3 
@@ -490,6 +559,12 @@ def displayGameOver(shell, stdscr, mineWin, width, height, success):
     yend = fieldHeight 
     halfx = (Consts.numhlines + 1) / 2
     halfy = (Consts.numvlines + 1) / 2
+    color = curses.color_pair(1)
+    if success:
+        color = curses.color_pair(3)
+        drawMineFieldFrame(mineWin, width, height, curses.color_pair(3))
+    else:
+        drawMineFieldFrame(mineWin, width, height, curses.color_pair(7))
     for x in range (0, xend):
         for y in range (0, yend):
             disx = x
@@ -499,27 +574,31 @@ def displayGameOver(shell, stdscr, mineWin, width, height, success):
                     fieldx = int((disx / halfx - 1) / 2)
                     fieldy = int((disy / halfy - 1) / 2)
                     attr = 0
-                    if success:
-                        if shell.field.status[fieldy][fieldx] == -1 and shell.field.opened[fieldy][fieldx] == False:
-                            starty, startx = mineWin.getbegyx()
-                            flagMineField(y + starty, x + startx, shell, mineWin)
-                        attr = curses.A_NORMAL | curses.A_STANDOUT | curses.color_pair(3)
-                        #stdscr.addstr(2, 1, 'Success')
-                    else:
-                        if shell.field.flagged[fieldy][fieldx] == False and shell.field.opened[fieldy][fieldx] == False:
-                            num = shell.field.status[fieldy][fieldx]
-                            if num < 0:
+                    if shell.field.flagged[fieldy][fieldx] == False and shell.field.opened[fieldy][fieldx] == False:
+                        num = shell.field.status[fieldy][fieldx]
+                        shell.field.opened[fieldy][fieldx] = True
+                        if num < 0:
+                            if success:
+                                num = '$'
+                                attr = curses.A_STANDOUT | curses.color_pair(7)
+                                mineWin.addstr(y, x, num, attr) 
+                                mineWin.addch(y, x - 1, ord(' '), attr)
+                                mineWin.addch(y, x + 1, ord(' '), attr)
+                            else:
                                 num = ':('
+                                attr = curses.A_STANDOUT | curses.color_pair(7)
+                                mineWin.addstr(y, x, num, attr) 
+                                mineWin.addch(y, x - 1, ord(' '), attr)
+                        else:
+                            attr = curses.A_BOLD | curses.color_pair(num + 1) 
+                            if num == 0:
+                                num = ' '
                             else:
                                 num = str(num)
-                            mineWin.addstr(y, x, num) 
-                        shell.field.opened[fieldy][fieldx] = True
-                        attr = curses.A_STANDOUT | curses.color_pair(7)
-                        #stdscr.addstr(2, 1, 'You dead')
+                            mineWin.addstr(y, x, num, attr) 
+                            mineWin.addch(y, x + 1, ' ', attr) 
+                            mineWin.addch(y, x - 1, ' ', attr)
 
-                    mineWin.chgat(y, x, 1, attr)
-                    mineWin.chgat(y, x + 1, 1, attr)
-                    mineWin.chgat(y, x - 1, 1, attr)
     mineWin.refresh()
     return end_time
 
