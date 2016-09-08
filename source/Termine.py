@@ -15,13 +15,13 @@ def Main(stdscr):
         curses.endwin()
         helpInfo()
         sys.exit(1) 
+    stdscr.refresh()
     mineFieldWidth, mineFieldHeight, numMines, mode = parseArgs(sys.argv)
     shell = MineShell()
     createField = 'minefield ' + str(mineFieldWidth) + ' ' + str(mineFieldHeight) + ' ' + str(numMines)
     out = shell.getInput(createField)
-    stdscr.refresh()
     mine, log, panel, record = drawWindowLayout(stdscr, mineFieldWidth, mineFieldHeight)
-    drawUndeployedMineField(mine, mineFieldWidth, mineFieldHeight)
+    drawUndeployedMineField(mine)
     start_time = 0
     end_time = 0
     start_pause = 0
@@ -207,7 +207,7 @@ def restartNewGame(mine, mineFieldWidth, mineFieldHeight, numMines):
     shell = MineShell()
     createField = 'minefield ' + str(mineFieldWidth) + ' ' + str(mineFieldHeight) + ' ' + str(numMines)
     out = shell.getInput(createField)
-    drawUndeployedMineField(mine, mineFieldWidth, mineFieldHeight)
+    drawUndeployedMineField(mine)
     return shell
 
 
@@ -395,151 +395,85 @@ def drawPokedMineField(shell, mineWin, width, height):
                         mineWin.addch(y, x + 1, ord(' '), attr)
     mineWin.refresh()
 
-def drawMineFieldFrame(mineWin, width, height, color):
-    windowHeight, windowWidth = mineWin.getmaxyx()
-    fieldWidth = (Consts.numhlines + 1) * width
-    fieldHeight = (Consts.numvlines + 1) * height
+def drawMineFieldFrame(mine, color):
+    height, width = mine.getmaxyx()
     starty, startx = 0, 0
     xindex, yindex = startx, starty
-    xend = xindex + fieldWidth
-    yend = yindex + fieldHeight 
+    xend, yend = width - 1, height - 1
     attr = curses.A_BOLD | color 
-    mineWin.addch(starty, startx, curses.ACS_ULCORNER, attr)
-    mineWin.addch(starty + (Consts.numvlines + 1) * height, startx, curses.ACS_LLCORNER, attr)
-    mineWin.addch(starty, startx + (Consts.numhlines + 1) * width, curses.ACS_URCORNER, attr)
-    mineWin.addch(starty + (Consts.numvlines + 1) * height, startx + (Consts.numhlines + 1) * width, curses.ACS_LRCORNER, attr)
+    drawBorder(mine, color)
     for x in range(xindex + 1, xend):
         if (x - startx) % (Consts.numhlines + 1) == 0:
-            mineWin.addch(yindex, x, curses.ACS_TTEE, attr)
+            mine.addch(yindex, x, curses.ACS_TTEE, attr)
             for y in range(yindex + 1, yend):
                 if (y - starty) % (Consts.numvlines + 1) != 0:
-                    mineWin.addch(y, x, curses.ACS_VLINE, attr)
+                    mine.addch(y, x, curses.ACS_VLINE, attr)
         else:
-            mineWin.addch(yindex, x, curses.ACS_HLINE, attr)
+            mine.addch(yindex, x, curses.ACS_HLINE, attr)
 
     for x in range(xindex + 1, xend):
         if (x - startx) % (Consts.numhlines + 1) == 0:
-            mineWin.addch(yend, x, curses.ACS_BTEE, attr)
+            mine.addch(yend, x, curses.ACS_BTEE, attr)
         else:
-            mineWin.addch(yend, x, curses.ACS_HLINE, attr)
+            mine.addch(yend, x, curses.ACS_HLINE, attr)
 
     for y in range(yindex + 1, yend):
         if (y - starty) % (Consts.numvlines + 1) == 0:
-            mineWin.addch(y, startx, curses.ACS_LTEE, attr)
+            mine.addch(y, startx, curses.ACS_LTEE, attr)
             for x in range(xindex + 1, xend):
                 if (x - startx) % (Consts.numhlines + 1) == 0:
-                    mineWin.addch(y, x, curses.ACS_PLUS, attr)
+                    mine.addch(y, x, curses.ACS_PLUS, attr)
                 else:
-                    mineWin.addch(y, x, curses.ACS_HLINE, attr)
+                    mine.addch(y, x, curses.ACS_HLINE, attr)
         else:
-            mineWin.addch(y, startx, curses.ACS_VLINE, attr)
+            mine.addch(y, startx, curses.ACS_VLINE, attr)
 
     for y in range(yindex + 1, yend):
         if (y - starty) % (Consts.numvlines + 1) == 0:
-            mineWin.addch(y, xend, curses.ACS_RTEE, attr)
+            mine.addch(y, xend, curses.ACS_RTEE, attr)
         else:
-            mineWin.addch(y, xend, curses.ACS_VLINE, attr)
-    #mineWin.refresh()
+            mine.addch(y, xend, curses.ACS_VLINE, attr)
 
-def drawUndeployedMineField(mineWin, width, height):
-    drawMineFieldFrame(mineWin, width, height, curses.color_pair(1))
-    #windowHeight, windowWidth = mineWin.getmaxyx()
-    #fieldWidth = (Consts.numhlines + 1) * width
-    #fieldHeight = (Consts.numvlines + 1) * height
-    #starty, startx = 0, 0
-    #xindex, yindex = startx, starty
-    #xend = xindex + fieldWidth
-    #yend = yindex + fieldHeight 
-    #attr = curses.A_BOLD | curses.color_pair(1)
-    #mineWin.addch(starty, startx, curses.ACS_ULCORNER, attr)
-    #mineWin.addch(starty + (Consts.numvlines + 1) * height, startx, curses.ACS_LLCORNER, attr)
-    #mineWin.addch(starty, startx + (Consts.numhlines + 1) * width, curses.ACS_URCORNER, attr)
-    #mineWin.addch(starty + (Consts.numvlines + 1) * height, startx + (Consts.numhlines + 1) * width, curses.ACS_LRCORNER, attr)
-    #for x in range(xindex + 1, xend):
-    #    if (x - startx) % (Consts.numhlines + 1) == 0:
-    #        mineWin.addch(yindex, x, curses.ACS_TTEE, attr)
-    #        for y in range(yindex + 1, yend):
-    #            if (y - starty) % (Consts.numvlines + 1) != 0:
-    #                mineWin.addch(y, x, curses.ACS_VLINE, attr)
-    #    else:
-    #        mineWin.addch(yindex, x, curses.ACS_HLINE, attr)
-
-    #for x in range(xindex + 1, xend):
-    #    if (x - startx) % (Consts.numhlines + 1) == 0:
-    #        mineWin.addch(yend, x, curses.ACS_BTEE, attr)
-    #    else:
-    #        mineWin.addch(yend, x, curses.ACS_HLINE, attr)
-
-    #for y in range(yindex + 1, yend):
-    #    if (y - starty) % (Consts.numvlines + 1) == 0:
-    #        mineWin.addch(y, startx, curses.ACS_LTEE, attr)
-    #        for x in range(xindex + 1, xend):
-    #            if (x - startx) % (Consts.numhlines + 1) == 0:
-    #                mineWin.addch(y, x, curses.ACS_PLUS, attr)
-    #            else:
-    #                mineWin.addch(y, x, curses.ACS_HLINE, attr)
-    #    else:
-    #        mineWin.addch(y, startx, curses.ACS_VLINE, attr)
-
-    #for y in range(yindex + 1, yend):
-    #    if (y - starty) % (Consts.numvlines + 1) == 0:
-    #        mineWin.addch(y, xend, curses.ACS_RTEE, attr)
-    #    else:
-    #        mineWin.addch(y, xend, curses.ACS_VLINE, attr)
-
-    windowHeight, windowWidth = mineWin.getmaxyx()
-    fieldWidth = (Consts.numhlines + 1) * width
-    fieldHeight = (Consts.numvlines + 1) * height
+def drawUndeployedMineField(mine):
+    drawMineFieldFrame(mine, curses.color_pair(1))
     starty, startx = 0, 0
-    xindex, yindex = startx, starty
-    xend = xindex + fieldWidth
-    yend = yindex + fieldHeight 
+    yend, xend = mine.getmaxyx()
     halfx = (Consts.numhlines + 1) / 2
     halfy = (Consts.numvlines + 1) / 2
-
-    for x in range (startx, xend):
-        for y in range (starty, yend):
+    for x in range (startx, xend - 1):
+        for y in range (starty, yend - 1):
             disx = x - startx
             disy = y - starty
             if (disx % halfx == 0) and (disx / halfx) % 2 != 0:
                 if (disy % halfy == 0) and (disy / halfy) % 2 != 0:
                     fieldx = int((disx / halfx - 1) / 2)
                     fieldy = int((disy / halfy - 1) / 2)
-                    mineWin.addch(y, x, ord(' '), curses.A_REVERSE)
-                    mineWin.addch(y, x + 1, ord(' '), curses.A_REVERSE)
-                    mineWin.addch(y, x - 1, ord(' '), curses.A_REVERSE)
-    mineWin.refresh()
+                    mine.addch(y, x, ord(' '), curses.A_REVERSE)
+                    mine.addch(y, x + 1, ord(' '), curses.A_REVERSE)
+                    mine.addch(y, x - 1, ord(' '), curses.A_REVERSE)
+    mine.refresh()
 
 def drawWindowLayout(stdscr, fwidth, fheight):
     height, width = stdscr.getmaxyx()
-    heightDividor = (int)(height / 8)
-    logColumns = 20
-    paddingMineLog = 2 
-    mineLines = 7 * heightDividor
-    mineColumns = width - logColumns - paddingMineLog
-    paddingTop = 3 
-    windowHeight, windowWidth = mineLines, mineColumns
-    fieldWidth = (Consts.numhlines + 1) * (fwidth + 1)
-    fieldHeight = (Consts.numvlines + 1) * (fheight + 1)
-    starty = (int)((windowHeight - fieldHeight) / 2) 
-    startx = (int)((windowWidth - fieldWidth) / 2)
-    recordWidth = 25 
-    recordHeight = 16 
-    recordBeginx = startx + fieldWidth // 2 - recordWidth // 2 - 2 
-    recordBeginy = starty + paddingTop + fieldHeight // 2 - recordHeight // 2 - 2 
-    recordWin = curses.newwin(recordHeight, recordWidth, recordBeginy, recordBeginx) 
-    mineWin = curses.newwin(fieldHeight, fieldWidth, starty + paddingTop, startx)
-    logLines = height - 3 
-    logWin = curses.newwin(logLines, logColumns, 0, mineColumns + paddingMineLog)
+    mineFieldWidth = Consts.numhlines * fwidth + fwidth + 1
+    mineFieldHeight = Consts.numvlines * fheight + fheight + 1
+    if mineFieldWidth + Consts.logWindowWidth >= width:
+        return None 
+    if mineFieldHeight + Consts.controlBarHeight >= height:
+        return None 
+    starty = (int)((height - Consts.controlBarHeight - mineFieldHeight) / 2) 
+    startx = (int)((width - Consts.logWindowWidth - mineFieldWidth) / 2)
+    mineWin = curses.newwin(mineFieldHeight, mineFieldWidth, starty, startx)
+    recordBeginx = startx + mineFieldWidth // 2 - Consts.recordWinWidth // 2 - 2 
+    recordBeginy = starty + mineFieldHeight // 2 - Consts.recordWinHeight // 2 - 2 
+    recordWin = curses.newwin(Consts.recordWinHeight, Consts.recordWinWidth, recordBeginy, recordBeginx) 
+    logWin = curses.newwin(height - Consts.controlBarHeight, Consts.logWindowWidth, 0, width - Consts.logWindowWidth)
     drawBorder(logWin, curses.color_pair(6))
     logWin.refresh()
-    paddingMinePanel = 2
-    panelLines = 3 
-    panelColumns = width
-    panelWin = curses.newwin(panelLines, panelColumns, height - panelLines, 0)
-    drawBorder(panelWin, curses.color_pair(5))
-    panelWin.refresh()
-    return (mineWin, logWin, panelWin, recordWin)
+    controlBar = curses.newwin(Consts.controlBarHeight, width, height - Consts.controlBarHeight, 0)
+    drawBorder(controlBar, curses.color_pair(5))
+    controlBar.refresh()
+    return mineWin, logWin, controlBar, recordWin
 
 def drawBorder(win, color):
     attr = color | curses.A_BOLD
@@ -562,9 +496,9 @@ def displayGameOver(shell, stdscr, mineWin, width, height, success):
     color = curses.color_pair(1)
     if success:
         color = curses.color_pair(3)
-        drawMineFieldFrame(mineWin, width, height, curses.color_pair(3))
+        drawMineFieldFrame(mineWin, curses.color_pair(3))
     else:
-        drawMineFieldFrame(mineWin, width, height, curses.color_pair(7))
+        drawMineFieldFrame(mineWin, curses.color_pair(7))
     for x in range (0, xend):
         for y in range (0, yend):
             disx = x
@@ -602,29 +536,6 @@ def displayGameOver(shell, stdscr, mineWin, width, height, success):
     mineWin.refresh()
     return end_time
 
-def shineMineField(mineWin, width, height): 
-    fieldWidth = (Consts.numhlines + 1) * width
-    fieldHeight = (Consts.numvlines + 1) * height
-    xend = fieldWidth
-    yend = fieldHeight 
-    halfx = (Consts.numhlines + 1) / 2
-    halfy = (Consts.numvlines + 1) / 2
-    while True:
-        mineWin.clear()
-        for x in range (0, xend):
-            for y in range (0, yend):
-                disx = x
-                disy = y
-                if (disx % halfx == 0) and (disx / halfx) % 2 != 0:
-                    if (disy % halfy == 0) and (disy / halfy) % 2 != 0:
-                        fieldx = int((disx / halfx - 1) / 2)
-                        fieldy = int((disy / halfy - 1) / 2)
-                        attr = curses.A_STANDOUT | curses.color_pair(3)
-                        mineWin.chgat(y, x, 1, attr)
-                        mineWin.chgat(y, x + 1, 1, attr)
-                        mineWin.chgat(y, x - 1, 1, attr)
-        time.sleep(0.05)
-        mineWin.refresh()
 
 def helpInfo():
     print('If you want to play standard mode, please enter:')
