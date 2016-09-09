@@ -165,7 +165,6 @@ class Mine:
 
 
     def displayGameOver(self, success):
-        end_time = time.time()
         yend, xend = self.win.getmaxyx()
         halfx = (Consts.numhlines + 1) / 2
         halfy = (Consts.numvlines + 1) / 2
@@ -182,33 +181,31 @@ class Mine:
                         fieldx = int((x / halfx - 1) / 2)
                         fieldy = int((y / halfy - 1) / 2)
                         attr = 0
-                        if self.shell.field.flagged[fieldy][fieldx] == False and self.shell.field.opened[fieldy][fieldx] == False:
-                            num = self.shell.field.status[fieldy][fieldx]
-                            self.shell.field.opened[fieldy][fieldx] = True
-                            if num < 0:
-                                if success:
-                                    num = '$'
-                                    attr = curses.A_STANDOUT | curses.color_pair(7)
-                                    self.win.addstr(y, x, num, attr) 
-                                    self.win.addch(y, x - 1, ord(' '), attr)
-                                    self.win.addch(y, x + 1, ord(' '), attr)
-                                else:
-                                    num = ':('
-                                    attr = curses.A_STANDOUT | curses.color_pair(7)
-                                    self.win.addstr(y, x, num, attr) 
-                                    self.win.addch(y, x - 1, ord(' '), attr)
-                            else:
-                                attr = curses.A_BOLD | curses.color_pair(num + 1) 
-                                if num == 0:
-                                    num = ' '
-                                else:
-                                    num = str(num)
+                        num = self.shell.field.status[fieldy][fieldx]
+                        if num < 0:
+                            if success:
+                                num = '$'
+                                attr = curses.A_STANDOUT | curses.color_pair(7)
                                 self.win.addstr(y, x, num, attr) 
-                                self.win.addch(y, x + 1, ' ', attr) 
-                                self.win.addch(y, x - 1, ' ', attr)
+                                self.win.addstr(y, x - 1, ' ', attr)
+                                self.win.addstr(y, x + 1, ' ', attr)
+                            else:
+                                num = ':('
+                                attr = curses.A_STANDOUT | curses.color_pair(7)
+                                self.win.addstr(y, x, num, attr) 
+                                self.win.addstr(y, x - 1, ' ', attr)
+                        else:
+                            attr = curses.A_BOLD | curses.color_pair(num + 1) 
+                            if num == 0:
+                                num = ' '
+                            else:
+                                num = str(num)
+                            self.win.addstr(y, x, num, attr) 
+                            self.win.addstr(y, x + 1, ' ', attr) 
+                            self.win.addstr(y, x - 1, ' ', attr)
 
         self.win.refresh()
-        return end_time
+        return
 
     def drawPokedMineField(self):
         fieldHeight, fieldWidth = self.win.getmaxyx()

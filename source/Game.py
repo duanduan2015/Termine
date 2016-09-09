@@ -12,14 +12,18 @@ class Game:
         self.num = num
         self.scr = stdscr
         self.fileName = str(width) + 'X' + str(height) + 'with' + str(num) + 'mines'
-        self.isPaused = False
+        self.success = None
+        self.gameOver = None 
         self.record = None
         self.mine = None
         self.timer = None
         self.mineWin = None
         self.startTime = None
+        self.totalTime = None
 
     def start(self):
+        self.success = False
+        self.gameOver = False
         shell = MineShell()
         self.timer = Timer()
         createField = 'minefield ' + str(self.width) + ' ' + str(self.height) + ' ' + str(self.num)
@@ -41,11 +45,16 @@ class Game:
         self.timer.resume()
         self.record.eraseRecord()
         self.mine.drawUndeployedMineField()
-        self.mine.drawPokedMineField()
-        self.mine.enablePoke()
+        if self.isGameOver():
+            self.displayGameOver(self.success)
+        else:
+            self.mine.drawPokedMineField()
+            self.mine.enablePoke()
         return
 
     def restart(self):
+        self.success = False
+        self.gameOver = False
         self.record.eraseRecord()
         shell = MineShell()
         self.timer = Timer()
@@ -81,18 +90,39 @@ class Game:
         return
 
     def addNewRecord(self):
-        time = self.timer.getTotalTime()
-        self.record.addNewRecord(self.fileName, time)
+        self.totalTime = self.timer.getTotalTime()
+        self.record.addNewRecord(self.fileName, self.totalTime)
 
     def displayRecord(self):
-        if not self.checkWin() and not checkLose():
+        if not self.checkWin() and not self.checkLose():
             self.pause()
-        self.record.displayRecords(self.fileName, 0)
+            self.record.displayRecords(self.fileName, None)
+        else:
+            self.record.displayRecords(self.fileName, int(self.totalTime))
         return
 
     def displayGameOver(self, success):
-        self.timer.end()
         self.mine.displayGameOver(success)
         self.mine.disablePoke()
+    
+    def isGameOver(self):
+        return self.gameOver
+
+    def gameWin(self):
+        if self.isGameOver():
+            return
+        self.success = True
+        self.gameOver = True
+        self.timer.end()
+        self.displayGameOver(True)
+        self.addNewRecord()
+        self.displayRecord()
         return
 
+    def gameLose(self):
+        if self.isGameOver():
+            return
+        self.gameOver = True
+        self.displayGameOver(False)
+        return
+        

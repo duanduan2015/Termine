@@ -28,12 +28,7 @@ def Main(stdscr):
         event = stdscr.getch()
 
         if game.checkWin():
-            game.displayGameOver(True)
-            game.addNewRecord()
-            game.displayRecord()
-
-        if game.checkLose():
-            game.displayGameOver(False)
+            game.gameWin()
 
         if event == ord("q"): 
             game.exit() 
@@ -54,7 +49,7 @@ def Main(stdscr):
             _, mx, my, _, bstate = curses.getmouse()
             if bstate & curses.BUTTON1_PRESSED :
                 if game.poke(my, mx) == "dead":
-                    game.displayGameOver(False)
+                    game.gameLose()
             elif bstate & curses.BUTTON3_PRESSED:
                 game.flag(my, mx)
             

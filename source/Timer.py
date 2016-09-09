@@ -3,14 +3,12 @@ class Timer:
     def __init__(self):
         self.startTime = None 
         self.endTime = None 
-        self.pauseStartTime = None 
-        self.pauseStopTime = None
         self.totalTime = None 
+        self.timerStarted = False
 
     def start(self):
+        self.timerStarted = True
         self.startTime = time.time()
-        self.pauseStartTime = 0
-        self.pauseStopTime = 0
         self.totalTime = 0
         
     def end(self):
@@ -25,17 +23,22 @@ class Timer:
         self.startTime = 0
 
     def resume(self):
-        self.startTime = time.time();
+        if self.isTimerPaused() == True and self.isTimerStarted() == True:
+            self.startTime = time.time();
+        else:
+            return
 
     def getTotalTime(self):
         return self.totalTime
 
-    def isTimerStarted(self):
-        if self.startTime == None:
-            return False
-        else:
+
+    def isTimerPaused(self):
+        if self.startTime == 0:
             return True
+        else:
+            return False
 
-
+    def isTimerStarted(self):
+        return self.timerStarted
     
 
