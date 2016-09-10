@@ -11,19 +11,13 @@ from Window import Window
 from Record import Record
 from Mine import Mine
 from Game import Game
+from Arguments import Arguments
 
 def Main(stdscr):
-    setCursesFeatures()
-    if sys.argv[1] == 'help':
-        curses.endwin()
-        helpInfo()
-        sys.exit(1) 
-    stdscr.refresh()
-    mineFieldWidth, mineFieldHeight, numMines, mode = parseArgs(sys.argv)
-
+    args = Arguments(sys.argv)
+    mineFieldWidth, mineFieldHeight, numMines, mode = args.parse()
     game = Game(stdscr, mineFieldWidth, mineFieldHeight, numMines)
     game.start() 
-
     while True:
         event = stdscr.getch()
 
@@ -33,16 +27,16 @@ def Main(stdscr):
         if event == ord("q"): 
             game.exit() 
 
-        if event == ord("R"):   #display Records
+        if event == ord("R"):   
             game.displayRecord()
 
-        if event == ord("c"):   #continue game
+        if event == ord("c"):   
             game.resume()
 
-        if event == ord("p"):   #pause game
+        if event == ord("p"):   
             game.pause()
 
-        if event == ord("r"):   #restart game
+        if event == ord("r"):   
             game.restart()
 
         if event == curses.KEY_MOUSE:
@@ -52,40 +46,5 @@ def Main(stdscr):
                     game.gameLose()
             elif bstate & curses.BUTTON3_PRESSED:
                 game.flag(my, mx)
-            
-
-def parseArgs(args):
-    if args[1] == 'easy':
-        return (8, 8, 10, 'easy')
-    if args[1] == 'medium':
-        return (16, 16, 40, 'medium')
-    if args[1] == 'hard':
-        return (30, 16, 99, 'hard')
-    if args[1] == 'customized':
-        width = int(args[2])
-        height = int(args[3])
-        num = int(args[4])
-        return (width, height, num, 'customized')
-
-
-def setCursesFeatures():
-    curses.start_color()
-    curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK)
-    curses.init_pair(3, curses.COLOR_GREEN, curses.COLOR_BLACK)
-    curses.init_pair(6, curses.COLOR_BLUE, curses.COLOR_BLACK)
-    curses.init_pair(2, curses.COLOR_CYAN, curses.COLOR_BLACK)
-    curses.init_pair(4, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-    curses.init_pair(5, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
-    curses.init_pair(7, curses.COLOR_RED, curses.COLOR_BLACK)
-    curses.mousemask(-1)
-    curses.mouseinterval(0)
-    curses.curs_set(0)
-
-
-def helpInfo():
-    print('If you want to play standard mode, please enter:')
-    print('python3 Termine.py easy/medium/hard')
-    print('If you want to play your own customized mode, pleas enter:')
-    print('python3 Termine.py customized <width> <height> <numOfMines>')
 
 wrapper(Main)

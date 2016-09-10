@@ -1,4 +1,5 @@
 import sys
+import curses
 from MineShell.MineShell import MineShell
 from Window import Window
 from Record import Record
@@ -24,6 +25,7 @@ class Game:
     def start(self):
         self.success = False
         self.gameOver = False
+        self.setCurses()
         shell = MineShell()
         self.timer = Timer()
         createField = 'minefield ' + str(self.width) + ' ' + str(self.height) + ' ' + str(self.num)
@@ -126,3 +128,17 @@ class Game:
         self.displayGameOver(False)
         return
         
+
+    def setCurses(self):
+        self.scr.refresh()
+        curses.start_color()
+        curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK)
+        curses.init_pair(3, curses.COLOR_GREEN, curses.COLOR_BLACK)
+        curses.init_pair(6, curses.COLOR_BLUE, curses.COLOR_BLACK)
+        curses.init_pair(2, curses.COLOR_CYAN, curses.COLOR_BLACK)
+        curses.init_pair(4, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+        curses.init_pair(5, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
+        curses.init_pair(7, curses.COLOR_RED, curses.COLOR_BLACK)
+        curses.mousemask(-1)
+        curses.mouseinterval(0)
+        curses.curs_set(0)
