@@ -99,8 +99,10 @@ class Game:
         if not self.checkWin() and not self.checkLose():
             self.pause()
             self.record.displayRecords(self.fileName, None)
-        else:
+        elif self.checkWin():
             self.record.displayRecords(self.fileName, int(self.totalTime))
+        elif self.checkLose():
+            self.record.displayRecords(self.fileName, None)
         return
 
     def displayGameOver(self, success):
