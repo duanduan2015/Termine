@@ -22,7 +22,18 @@ class Window:
         self.drawBorder(logWin, curses.color_pair(6))
         logWin.refresh()
         controlBar = curses.newwin(Consts.controlBarHeight, width, height - Consts.controlBarHeight, 0)
-        self.drawBorder(controlBar, curses.color_pair(5))
+        self.drawBorder(controlBar, curses.color_pair(6))
+        attr = curses.A_STANDOUT | curses.color_pair(7) | curses.A_BOLD
+        controlBar.addstr(1, width - 9, " EXIT ", attr)
+        attr = curses.A_STANDOUT | curses.color_pair(5) | curses.A_BOLD
+        controlBar.addstr(1, 3, " PAUSE ", attr)
+        attr = curses.A_STANDOUT | curses.color_pair(3) | curses.A_BOLD
+        controlBar.addstr(1, 14, " RESUME ", attr)
+        attr = curses.A_STANDOUT | curses.color_pair(4) | curses.A_BOLD
+        controlBar.addstr(1, 26, " RESTART ", attr)
+        attr = curses.A_STANDOUT | curses.color_pair(1) | curses.A_BOLD
+        controlBar.addstr(1, 39, " RECORDS ", attr)
+
         controlBar.refresh()
         return mineWin, logWin, controlBar, recordWin
 
