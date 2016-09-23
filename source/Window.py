@@ -18,9 +18,10 @@ class Window:
         recordBeginx = startx + mineFieldWidth // 2 - Consts.recordWinWidth // 2 
         recordBeginy = starty + mineFieldHeight // 2 - Consts.recordWinHeight // 2 - 2 
         recordWin = curses.newwin(Consts.recordWinHeight, Consts.recordWinWidth, recordBeginy, recordBeginx) 
-        logWin = curses.newwin(height - Consts.controlBarHeight, Consts.logWindowWidth, 0, width - Consts.logWindowWidth)
-        self.drawBorder(logWin, curses.color_pair(6))
-        logWin.refresh()
+        #logWin = curses.newwin(height - Consts.controlBarHeight, Consts.logWindowWidth, 0, width - Consts.logWindowWidth)
+        #self.drawBorder(logWin, curses.color_pair(6))
+        #logWin.refresh()
+        logWin = None
         controlBar = curses.newwin(Consts.controlBarHeight, width, height - Consts.controlBarHeight, 0)
         self.drawBorder(controlBar, curses.color_pair(6))
         attr = curses.A_STANDOUT | curses.color_pair(7) | curses.A_BOLD
