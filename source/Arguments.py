@@ -27,4 +27,4 @@ class Arguments:
         print('python3 Termine.py easy/medium/hard')
         print('If you want to play your own customized mode, pleas enter:')
         print('python3 Termine.py customized <width> <height> <numOfMines>')
-        sys.exit(1) 
+        sys.exit(0) 

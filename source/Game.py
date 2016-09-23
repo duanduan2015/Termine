@@ -1,4 +1,5 @@
 import sys
+from types import *
 import curses
 from MineShell.MineShell import MineShell
 from Window import Window
@@ -31,7 +32,13 @@ class Game:
         createField = 'minefield ' + str(self.width) + ' ' + str(self.height) + ' ' + str(self.num)
         shell.getInput(createField)
         window = Window(self.scr)
-        self.mineWin, log, panel, record = window.drawLayout(self.width, self.height)
+        layout = window.drawLayout(self.width, self.height)
+        if layout == None:
+            curses.endwin()
+            print("The window is too small to display the Game field")
+            print("Please increase the window size or decrease the font size")
+            sys.exit(0);
+        self.mineWin, log, panel, record = layout 
         self.record = Record(record)
         self.mine = Mine(self.mineWin, shell)
         self.mine.drawUndeployedMineField()
