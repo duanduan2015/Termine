@@ -1,5 +1,5 @@
-numhlines = 3
-numvlines = 1
+numhlines = 3 
+numvlines = 1 
 logWindowWidth = 0 
 controlBarHeight = 3
 recordWinWidth = 25
