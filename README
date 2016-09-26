@@ -2,7 +2,7 @@ This is a minesweeper game
 
 python3 Termine.py easy -- for easy mode (8 X 8, 10 mines)
 python3 Termine.py medium -- for medium mode (16 X 16, 40 mines)
-python3 Termine.py hard -- for hard mode (32 X 16, 99 mines)
+python3 Termine.py hard -- for hard mode (30 X 16, 99 mines)
 python3 Termine.py customized width height numOfMines  
 
 Have fun and find bugs! :)
