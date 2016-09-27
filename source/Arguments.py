@@ -8,7 +8,8 @@ class Arguments:
     def parse(self):
         if self.args[1] == 'help':
             curses.endwin()
-            self.helpInfo()
+            self.printHelpInfo()
+            sys.exit(0) 
         if self.args[1] == 'easy':
             return (8, 8, 10, 'easy')
         if self.args[1] == 'medium':
@@ -22,9 +23,8 @@ class Arguments:
             return (width, height, num, 'customized')
 
 
-    def helpInfo(self):
+    def printHelpInfo(self):
         print('If you want to play standard mode, please enter:')
         print('python3 Termine.py easy/medium/hard')
         print('If you want to play your own customized mode, pleas enter:')
         print('python3 Termine.py customized <width> <height> <numOfMines>')
-        sys.exit(0) 

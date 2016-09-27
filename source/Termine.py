@@ -9,7 +9,7 @@ from curses import wrapper
 from MineShell.MineShell import MineShell
 from Window import Window
 from Record import Record
-from Mine import Mine
+from GameField import GameField 
 from Game import Game
 from Arguments import Arguments
 

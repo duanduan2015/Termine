@@ -4,7 +4,7 @@ import curses
 from MineShell.MineShell import MineShell
 from Window import Window
 from Record import Record
-from Mine import Mine
+from GameField import GameField 
 from Timer import Timer
 
 class Game:
@@ -40,7 +40,7 @@ class Game:
             sys.exit(0);
         self.mineWin, log, panel, record = layout 
         self.record = Record(record)
-        self.mine = Mine(self.mineWin, shell)
+        self.mine = GameField(self.mineWin, shell)
         self.mine.drawUndeployedMineField()
         return self.mine, log, panel, self.record
 
@@ -69,7 +69,7 @@ class Game:
         self.timer = Timer()
         createField = 'minefield ' + str(self.width) + ' ' + str(self.height) + ' ' + str(self.num)
         shell.getInput(createField)
-        self.mine = Mine(self.mineWin, shell)
+        self.mine = GameField(self.mineWin, shell)
         self.mine.drawUndeployedMineField()
         return
     
