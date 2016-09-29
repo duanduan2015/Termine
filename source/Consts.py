@@ -4,4 +4,6 @@ logWindowWidth = 0
 controlBarHeight = 3
 recordWinWidth = 25
 recordWinHeight = 16
+global TIMER
+global PANEL
 

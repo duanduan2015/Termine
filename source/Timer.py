@@ -5,6 +5,7 @@ class Timer:
         self.endTime = None 
         self.totalTime = None 
         self.timerStarted = False
+        self.timerEnded = False
 
     def start(self):
         self.timerStarted = True
@@ -12,6 +13,7 @@ class Timer:
         self.totalTime = 0
         
     def end(self):
+        self.timerEnded = True
         self.endTime = time.time()
         self.totalTime = self.totalTime + self.endTime - self.startTime
 
@@ -41,4 +43,5 @@ class Timer:
     def isTimerStarted(self):
         return self.timerStarted
     
-
+    def isTimerEnded(self):
+        return self.timerEnded

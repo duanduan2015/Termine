@@ -1,11 +1,13 @@
 import sys
 from types import *
 import curses
+import Consts
 from MineShell.MineShell import MineShell
 from Window import Window
 from Record import Record
 from GameField import GameField 
 from Timer import Timer
+from ClockUpdater import ClockUpdater
 
 class Game:
     def __init__(self, stdscr, width, height, num):
@@ -22,6 +24,7 @@ class Game:
         self.mineWin = None
         self.startTime = None
         self.totalTime = None
+        self.clock = None
 
     def start(self):
         self.success = False
@@ -29,6 +32,7 @@ class Game:
         self.setCurses()
         shell = MineShell()
         self.timer = Timer()
+        Consts.TIMER = self.timer
         createField = 'minefield ' + str(self.width) + ' ' + str(self.height) + ' ' + str(self.num)
         shell.getInput(createField)
         window = Window(self.scr)
@@ -42,6 +46,10 @@ class Game:
         self.record = Record(record)
         self.mine = GameField(self.mineWin, shell)
         self.mine.drawUndeployedMineField()
+        Consts.PANEL = panel
+        self.clock = ClockUpdater()
+        self.clock.daemon = True
+        self.clock.start()
         return self.mine, log, panel, self.record
 
     def pause(self):
@@ -67,6 +75,7 @@ class Game:
         self.record.eraseRecord()
         shell = MineShell()
         self.timer = Timer()
+        Consts.TIMER = self.timer
         createField = 'minefield ' + str(self.width) + ' ' + str(self.height) + ' ' + str(self.num)
         shell.getInput(createField)
         self.mine = GameField(self.mineWin, shell)
@@ -133,6 +142,7 @@ class Game:
     def gameLose(self):
         if self.isGameOver():
             return
+        self.timer.end()
         self.gameOver = True
         self.displayGameOver(False)
         return

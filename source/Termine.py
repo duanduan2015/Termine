@@ -5,6 +5,7 @@ import curses
 import Consts
 import sys
 import os.path
+import threading
 from curses import wrapper
 from MineShell.MineShell import MineShell
 from Window import Window

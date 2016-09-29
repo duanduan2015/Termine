@@ -35,6 +35,9 @@ class Window:
         attr = curses.A_STANDOUT | curses.color_pair(1) | curses.A_BOLD
         controlBar.addstr(1, 39, " RECORDS ", attr)
 
+        attr = curses.A_STANDOUT | curses.color_pair(3) | curses.A_BOLD
+        controlBar.addstr(1, 55, " Time ", attr)
+
         controlBar.refresh()
         return mineWin, logWin, controlBar, recordWin
 
