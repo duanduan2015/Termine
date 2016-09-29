@@ -6,8 +6,7 @@ from MineShell.MineShell import MineShell
 from Window import Window
 from Record import Record
 from GameField import GameField 
-from Timer import Timer
-from ClockUpdater import ClockUpdater
+from Timer import *
 
 class Game:
     def __init__(self, stdscr, width, height, num):
@@ -23,7 +22,7 @@ class Game:
         self.timer = None
         self.mineWin = None
         self.startTime = None
-        self.totalTime = None
+        #self.totalTime = None
         self.clock = None
 
     def start(self):
@@ -47,9 +46,9 @@ class Game:
         self.mine = GameField(self.mineWin, shell)
         self.mine.drawUndeployedMineField()
         Consts.PANEL = panel
-        self.clock = ClockUpdater()
-        self.clock.daemon = True
-        self.clock.start()
+        clock = ClockUpdater()
+        clock.daemon = True
+        clock.start()
         return self.mine, log, panel, self.record
 
     def pause(self):
@@ -108,15 +107,16 @@ class Game:
         return
 
     def addNewRecord(self):
-        self.totalTime = self.timer.getTotalTime()
-        self.record.addNewRecord(self.fileName, self.totalTime)
+        #self.totalTime = self.timer.getTotalTime()
+        #self.record.addNewRecord(self.fileName, self.totalTime)
+        self.record.addNewRecord(self.fileName, Consts.totalTime)
 
     def displayRecord(self):
         if not self.checkWin() and not self.checkLose():
             self.pause()
             self.record.displayRecords(self.fileName, None)
         elif self.checkWin():
-            self.record.displayRecords(self.fileName, int(self.totalTime))
+            self.record.displayRecords(self.fileName, Consts.totalTime)
         elif self.checkLose():
             self.record.displayRecords(self.fileName, None)
         return

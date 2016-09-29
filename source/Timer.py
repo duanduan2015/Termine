@@ -1,44 +1,59 @@
 import time
+import threading 
+import curses
+import Consts
+
+class ClockUpdater(threading.Thread):
+    def run(self):
+        Consts.totalTime = 0
+        maxLen = 0
+        while True:
+            attr = curses.A_STANDOUT | curses.color_pair(3) | curses.A_BOLD
+            if not Consts.TIMER.isTimerStarted():
+                Consts.totalTime = 0.0
+                maxLen = 0
+            elif not Consts.TIMER.isTimerPaused() and not Consts.TIMER.isTimerEnded():
+                Consts.totalTime = Consts.totalTime + 0.1
+            msg = str(round(Consts.totalTime, 1))
+            if maxLen < len(msg) + 1:
+                maxLen = len(msg) + 1
+            Consts.PANEL.addstr(1, 56 + maxLen, " ", attr)
+            Consts.PANEL.addstr(1, 56, msg, attr)
+            Consts.PANEL.addstr(1, 56 + len(msg), "s", attr)
+
+            Consts.PANEL.refresh()
+            time.sleep(0.1)
+
 class Timer:
     def __init__(self):
-        self.startTime = None 
-        self.endTime = None 
-        self.totalTime = None 
         self.timerStarted = False
         self.timerEnded = False
+        self.timerPaused = False
 
     def start(self):
         self.timerStarted = True
-        self.startTime = time.time()
-        self.totalTime = 0
         
     def end(self):
         self.timerEnded = True
-        self.endTime = time.time()
-        self.totalTime = self.totalTime + self.endTime - self.startTime
 
     def pause(self):
         if self.isTimerStarted() == False:
             return
-        curTime = time.time()
-        self.totalTime = self.totalTime + curTime - self.startTime
-        self.startTime = 0
+        else:
+            self.timerPause = True
 
     def resume(self):
         if self.isTimerPaused() == True and self.isTimerStarted() == True:
-            self.startTime = time.time();
+            self.timerPaused = False
         else:
             return
 
     def getTotalTime(self):
-        return self.totalTime
+        return Consts.totalTime
 
 
     def isTimerPaused(self):
-        if self.startTime == 0:
-            return True
-        else:
-            return False
+        return self.timerPaused
 
     def isTimerStarted(self):
         return self.timerStarted

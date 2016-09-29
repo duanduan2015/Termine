@@ -26,7 +26,7 @@ class Record:
                     continue
                 strings = r.split(' ')
                 highLight = curses.A_BOLD | curses.color_pair(4)
-                if int(strings[1]) == highLightTime and highLighted == False:
+                if float(strings[1]) == round(highLightTime, 2) and highLighted == False:
                     highLighted = True
                     self.win.addstr(starty, 2, strings[0], highLight)
                     self.win.addstr(starty, 12, strings[1] + 's', highLight)
@@ -48,7 +48,8 @@ class Record:
             recordsFile = open(fileName, "w")
             recordsFile.close()
             recordsFile = open(fileName, "r")
-        time = int(totalTime)
+        #time = int(totalTime)
+        time = round(totalTime, 2)
         today = date.today().strftime("%d/%m/%y")
         records = [] 
         line = recordsFile.readline()
@@ -59,7 +60,8 @@ class Record:
             added = False
             for x in range(len(records)):
                 r = records[x].split(' ')
-                t = int(r[1])
+                #t = int(r[1])
+                t = float(r[1])
                 if t > time:
                     newLine = today + ' ' + str(time)
                     records.insert(x, newLine)
