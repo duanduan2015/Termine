@@ -23,20 +23,20 @@ class Window:
         #logWin.refresh()
         logWin = None
         controlBar = curses.newwin(Consts.controlBarHeight, width, height - Consts.controlBarHeight, 0)
-        self.drawBorder(controlBar, curses.color_pair(6))
+        self.drawBorder(controlBar, curses.color_pair(1))
         attr = curses.A_STANDOUT | curses.color_pair(7) | curses.A_BOLD
         controlBar.addstr(1, width - 9, " EXIT ", attr)
-        attr = curses.A_STANDOUT | curses.color_pair(5) | curses.A_BOLD
-        controlBar.addstr(1, 3, " PAUSE ", attr)
-        attr = curses.A_STANDOUT | curses.color_pair(3) | curses.A_BOLD
-        controlBar.addstr(1, 14, " RESUME ", attr)
         attr = curses.A_STANDOUT | curses.color_pair(4) | curses.A_BOLD
+        #attr = curses.A_STANDOUT | curses.color_pair(5) | curses.A_BOLD
+        controlBar.addstr(1, 3, " PAUSE ", attr)
+        #attr = curses.A_STANDOUT | curses.color_pair(3) | curses.A_BOLD
+        controlBar.addstr(1, 14, " RESUME ", attr)
         controlBar.addstr(1, 26, " RESTART ", attr)
-        attr = curses.A_STANDOUT | curses.color_pair(1) | curses.A_BOLD
+        #attr = curses.A_STANDOUT | curses.color_pair(1) | curses.A_BOLD
         controlBar.addstr(1, 39, " RECORDS ", attr)
 
         attr = curses.A_STANDOUT | curses.color_pair(3) | curses.A_BOLD
-        controlBar.addstr(1, 55, " Time ", attr)
+        controlBar.addstr(1, 75, "      ", attr)
 
         controlBar.refresh()
         return mineWin, logWin, controlBar, recordWin

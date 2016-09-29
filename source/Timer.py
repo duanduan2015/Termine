@@ -17,9 +17,9 @@ class ClockUpdater(threading.Thread):
             msg = str(round(Consts.totalTime, 1))
             if maxLen < len(msg) + 1:
                 maxLen = len(msg) + 1
-            Consts.PANEL.addstr(1, 56 + maxLen, " ", attr)
-            Consts.PANEL.addstr(1, 56, msg, attr)
-            Consts.PANEL.addstr(1, 56 + len(msg), "s", attr)
+            Consts.PANEL.addstr(1, 76 + maxLen, " ", attr)
+            Consts.PANEL.addstr(1, 76, msg, attr)
+            Consts.PANEL.addstr(1, 76 + len(msg), "s", attr)
 
             Consts.PANEL.refresh()
             time.sleep(0.1)
