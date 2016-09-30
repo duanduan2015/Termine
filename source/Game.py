@@ -2,6 +2,7 @@ import sys
 from types import *
 import curses
 import Consts
+import Global
 from MineShell.MineShell import MineShell
 from Window import Window
 from Record import Record
@@ -19,21 +20,19 @@ class Game:
         self.gameOver = None 
         self.record = None
         self.mine = None
-        self.timer = None
+        #self.timer = None
         self.mineWin = None
         self.startTime = None
-        #self.totalTime = None
         self.clock = None
 
     def start(self):
         self.success = False
         self.gameOver = False
         self.setCurses()
-        shell = MineShell()
-        self.timer = Timer()
-        Consts.TIMER = self.timer
+        Global.shell = MineShell()
+        Global.timer = Timer() 
         createField = 'minefield ' + str(self.width) + ' ' + str(self.height) + ' ' + str(self.num)
-        shell.getInput(createField)
+        Global.shell.getInput(createField)
         window = Window(self.scr)
         layout = window.drawLayout(self.width, self.height)
         if layout == None:
@@ -43,22 +42,24 @@ class Game:
             sys.exit(0);
         self.mineWin, log, panel, record = layout 
         self.record = Record(record)
-        self.mine = GameField(self.mineWin, shell)
+        self.mine = GameField(self.mineWin, Global.shell)
         self.mine.drawUndeployedMineField()
-        Consts.PANEL = panel
+        Global.panel = panel
         clock = ClockUpdater()
         clock.daemon = True
         clock.start()
         return self.mine, log, panel, self.record
 
     def pause(self):
-        self.timer.pause()
+        #self.timer.pause()
+        Global.timer.pause()
         self.mine.drawUndeployedMineField()
         self.mine.disablePoke()
         return
 
     def resume(self):
-        self.timer.resume()
+        #self.timer.resume()
+        Global.timer.resume()
         self.record.eraseRecord()
         self.mine.drawUndeployedMineField()
         if self.isGameOver():
@@ -72,18 +73,17 @@ class Game:
         self.success = False
         self.gameOver = False
         self.record.eraseRecord()
-        shell = MineShell()
-        self.timer = Timer()
-        Consts.TIMER = self.timer
+        Global.shell = MineShell()
+        Global.timer = Timer() 
         createField = 'minefield ' + str(self.width) + ' ' + str(self.height) + ' ' + str(self.num)
-        shell.getInput(createField)
-        self.mine = GameField(self.mineWin, shell)
+        Global.shell.getInput(createField)
+        self.mine = GameField(self.mineWin, Global.shell)
         self.mine.drawUndeployedMineField()
         return
     
     def poke(self, y, x):
-        if self.timer.isTimerStarted() == False:
-            self.timer.start()
+        if Global.timer.isTimerStarted() == False:
+            Global.timer.start()
         return self.mine.pokeMineField(y, x)
 
     def flag(self, y, x):
@@ -107,16 +107,14 @@ class Game:
         return
 
     def addNewRecord(self):
-        #self.totalTime = self.timer.getTotalTime()
-        #self.record.addNewRecord(self.fileName, self.totalTime)
-        self.record.addNewRecord(self.fileName, Consts.totalTime)
+        self.record.addNewRecord(self.fileName, Global.totalTime)
 
     def displayRecord(self):
         if not self.checkWin() and not self.checkLose():
             self.pause()
             self.record.displayRecords(self.fileName, None)
         elif self.checkWin():
-            self.record.displayRecords(self.fileName, Consts.totalTime)
+            self.record.displayRecords(self.fileName, Global.totalTime)
         elif self.checkLose():
             self.record.displayRecords(self.fileName, None)
         return
@@ -133,7 +131,7 @@ class Game:
             return
         self.success = True
         self.gameOver = True
-        self.timer.end()
+        Global.timer.end()
         self.displayGameOver(True)
         self.addNewRecord()
         self.displayRecord()
@@ -142,7 +140,7 @@ class Game:
     def gameLose(self):
         if self.isGameOver():
             return
-        self.timer.end()
+        Global.timer.end()
         self.gameOver = True
         self.displayGameOver(False)
         return

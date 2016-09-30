@@ -1,27 +1,27 @@
 import time
 import threading 
 import curses
-import Consts
+import Global
 
 class ClockUpdater(threading.Thread):
     def run(self):
-        Consts.totalTime = 0
+        Global.totalTime = 0
         maxLen = 0
         while True:
             attr = curses.A_STANDOUT | curses.color_pair(3) | curses.A_BOLD
-            if not Consts.TIMER.isTimerStarted():
-                Consts.totalTime = 0.0
+            if not Global.timer.isTimerStarted():
+                Global.totalTime = 0.0
                 maxLen = 0
-            elif not Consts.TIMER.isTimerPaused() and not Consts.TIMER.isTimerEnded():
-                Consts.totalTime = Consts.totalTime + 0.1
-            msg = str(round(Consts.totalTime, 1))
+            elif not Global.timer.isTimerPaused() and not Global.timer.isTimerEnded():
+                Global.totalTime = Global.totalTime + 0.1
+            msg = str(round(Global.totalTime, 1))
             if maxLen < len(msg) + 1:
                 maxLen = len(msg) + 1
-            Consts.PANEL.addstr(1, 76 + maxLen, " ", attr)
-            Consts.PANEL.addstr(1, 76, msg, attr)
-            Consts.PANEL.addstr(1, 76 + len(msg), "s", attr)
+            Global.panel.addstr(1, 76 + maxLen, " ", attr)
+            Global.panel.addstr(1, 76, msg, attr)
+            Global.panel.addstr(1, 76 + len(msg), "s", attr)
 
-            Consts.PANEL.refresh()
+            Global.panel.refresh()
             time.sleep(0.1)
 
 class Timer:
@@ -40,7 +40,7 @@ class Timer:
         if self.isTimerStarted() == False:
             return
         else:
-            self.timerPause = True
+            self.timerPaused = True
 
     def resume(self):
         if self.isTimerPaused() == True and self.isTimerStarted() == True:
@@ -49,7 +49,7 @@ class Timer:
             return
 
     def getTotalTime(self):
-        return Consts.totalTime
+        return Global.totalTime
 
 
     def isTimerPaused(self):

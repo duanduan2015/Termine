@@ -26,7 +26,7 @@ class Record:
                     continue
                 strings = r.split(' ')
                 highLight = curses.A_BOLD | curses.color_pair(4)
-                if float(strings[1]) == round(highLightTime, 2) and highLighted == False:
+                if highLightTime != None and float(strings[1]) == round(highLightTime, 2) and highLighted == False:
                     highLighted = True
                     self.win.addstr(starty, 2, strings[0], highLight)
                     self.win.addstr(starty, 12, strings[1] + 's', highLight)
